@@ -57,13 +57,6 @@ var UserDetailResponse = ResultType("application/vnd.user.detail+json", func() {
 		Attribute("active", Boolean, "Stato dell'utente", func() {
 			Default(true)
 		})
-		Attribute("memberships", CollectionOf(MembershipResponse), "I memberships dell'utente", func() {
-			Meta("struct:tag:json", "memberships")
-			Meta("struct:memberships:omitEmpty", "false")
-		})
-		Attribute("events", CollectionOf(EventResponse), "Eventi dell'utente", func() {
-			Meta("struct:tag:json", "events")
-		})
 
 	})
 	View("default", func() {
