@@ -3,6 +3,8 @@ package main
 import (
 	fileStore "aion/gen/file_store"
 	fileStoreSvr "aion/gen/http/file_store/server"
+	userGenSvr "aion/gen/http/user/server"
+	userGen "aion/gen/user"
 	"aion/internal/config"
 	"aion/internal/utils"
 	"context"
@@ -141,17 +143,21 @@ func errorHandler(logCtx context.Context) func(context.Context, http.ResponseWri
 
 // mountServices mounts RESTful service endpoints, mapping them from the endpoint map.
 func mountServices(ctx context.Context, mux goahttp.Muxer, dec func(*http.Request) goahttp.Decoder, enc func(context.Context, http.ResponseWriter) goahttp.Encoder, eh func(context.Context, http.ResponseWriter, error), epsMap map[config.EndpointName]interface{}) {
-	var userServer *fileStoreSvr.Server
-
+	var fileStoreServer *fileStoreSvr.Server
+	var userGenServer *userGenSvr.Server
 	// Mount each endpoint based on the provided endpoint map
 	for name, eps := range epsMap {
 		switch name {
 		case config.StoreEndPoint:
-			utils.Log.Info(ctx, "Mounting User service")
-			userEndpoints := eps.(*fileStore.Endpoints)
-			userServer = fileStoreSvr.New(userEndpoints, mux, dec, enc, eh, nil)
-			fileStoreSvr.Mount(mux, userServer)
+			FileStoreEndpoints := eps.(*fileStore.Endpoints)
+			fileStoreServer = fileStoreSvr.New(FileStoreEndpoints, mux, dec, enc, eh, nil)
+			fileStoreSvr.Mount(mux, fileStoreServer)
+		case config.UserEndPoint:
+			userEndpoints := eps.(*userGen.Endpoints)
+			userGenServer = userGenSvr.New(userEndpoints, mux, dec, enc, eh, nil)
+			userGenSvr.Mount(mux, userGenServer)
 		}
+
 	}
 }
 

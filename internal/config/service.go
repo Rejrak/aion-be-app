@@ -2,8 +2,10 @@ package config
 
 import (
 	filestore "aion/gen/file_store"
+	userGen "aion/gen/user"
 	"aion/internal/database/db"
 	storeService "aion/internal/store"
+	userService "aion/internal/user"
 	"context"
 
 	"goa.design/clue/debug"
@@ -14,6 +16,7 @@ type EndpointName string
 
 const (
 	StoreEndPoint EndpointName = "store"
+	UserEndPoint  EndpointName = "user"
 )
 
 type ServiceConfig struct {
@@ -22,7 +25,7 @@ type ServiceConfig struct {
 	NewEndpoints func(svc interface{}) interface{} // Function to create endpoints for the service
 }
 
-func initializedStoreService() ServiceConfig{
+func initializedStoreService() ServiceConfig {
 	return ServiceConfig{
 		EndpointName: StoreEndPoint,                                           // Label for this service
 		NewService:   func() interface{} { return storeService.NewService() }, // Function to instantiate the store service
@@ -36,12 +39,26 @@ func initializedStoreService() ServiceConfig{
 	}
 }
 
+func initializedUserService() ServiceConfig {
+	return ServiceConfig{
+		EndpointName: UserEndPoint,
+		NewService:   func() interface{} { return userService.NewService() },
+		NewEndpoints: func(svc interface{}) interface{} {
+			endpoints := userGen.NewEndpoints(svc.(userGen.Service))
+			endpoints.Use(debug.LogPayloads())
+			endpoints.Use(log.Endpoint)
+			return endpoints
+		},
+	}
+}
+
 func InitializeServices(ctx context.Context) map[EndpointName]interface{} {
 	storeConfig := initializedStoreService()
+	userConfig := initializedUserService()
 	epsMap := make(map[EndpointName]interface{})
 	db.ConnectDb()
-	
-	services := []ServiceConfig{storeConfig}
+
+	services := []ServiceConfig{storeConfig, userConfig}
 	for _, serviceConfig := range services {
 		svc := serviceConfig.NewService()              // Create a new service instance
 		endpoints := serviceConfig.NewEndpoints(svc)   // Generate endpoints for the service
