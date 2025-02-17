@@ -48,7 +48,7 @@ func main() {
 	// Set up environment-specific configurations
 	switch srvConf.Domain {
 	case "development":
-		db.ConnectDb()                                             // Connect to the database for development
+		db.ConnectDb()
 		epsMap := servConfig.InitializeServices(ctx)               // Initialize and map services to endpoints
 		u := srvConf.BuildServerURL(srvConf, ctx)                  // Build server URL based on configuration
 		HandleHttpServer(ctx, u, &wg, errc, srvConf.Debug, epsMap) // Start the HTTP server for development
