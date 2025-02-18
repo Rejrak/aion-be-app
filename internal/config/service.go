@@ -2,7 +2,6 @@ package config
 
 import (
 	userGen "aion/gen/user"
-	"aion/internal/database/db"
 	userService "aion/internal/user"
 	"context"
 
@@ -23,7 +22,7 @@ type ServiceConfig struct {
 	NewEndpoints func(svc interface{}) interface{} // Function to create endpoints for the service
 }
 
-func initializedUserService() ServiceConfig {
+func withUserService() ServiceConfig {
 	return ServiceConfig{
 		EndpointName: UserEndPoint,
 		NewService:   func() interface{} { return userService.NewService() },
@@ -37,10 +36,9 @@ func initializedUserService() ServiceConfig {
 }
 
 func InitializeServices(ctx context.Context) map[EndpointName]interface{} {
-	userConfig := initializedUserService()
+	userConfig := withUserService()
 	epsMap := make(map[EndpointName]interface{})
-	db.ConnectDb()
-
+	
 	services := []ServiceConfig{userConfig}
 	for _, serviceConfig := range services {
 		svc := serviceConfig.NewService()              // Create a new service instance
