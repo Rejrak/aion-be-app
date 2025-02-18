@@ -1,6 +1,6 @@
 openapi: 3.0.3
 info:
-    title: Ausa Service
+    title: Aion Service
     description: A service for something that need to be managed
     version: 0.0.1
 servers:
@@ -61,19 +61,13 @@ paths:
                                       kcId: 550e8400-e29b-41d4-a716-446655440000
                                       lastName: Doe
                                       nickname: JD
-                                    - admin: false
-                                      firstName: John
-                                      id: f47ac10b-58cc-4372-a567-0e02b2c3d479
-                                      kcId: 550e8400-e29b-41d4-a716-446655440000
-                                      lastName: Doe
-                                      nickname: JD
-                                    - admin: false
-                                      firstName: John
-                                      id: f47ac10b-58cc-4372-a567-0e02b2c3d479
-                                      kcId: 550e8400-e29b-41d4-a716-446655440000
-                                      lastName: Doe
-                                      nickname: JD
                             example:
+                                - admin: false
+                                  firstName: John
+                                  id: f47ac10b-58cc-4372-a567-0e02b2c3d479
+                                  kcId: 550e8400-e29b-41d4-a716-446655440000
+                                  lastName: Doe
+                                  nickname: JD
                                 - admin: false
                                   firstName: John
                                   id: f47ac10b-58cc-4372-a567-0e02b2c3d479
@@ -159,7 +153,7 @@ paths:
                             schema:
                                 $ref: '#/components/schemas/Unauthorized'
                             example:
-                                message: Quisquam nesciunt molestiae.
+                                message: Sit consequatur qui.
                 "404":
                     description: 'notFound: Dato non trovato all''interno del sistema'
                     content:
@@ -167,7 +161,7 @@ paths:
                             schema:
                                 $ref: '#/components/schemas/NotFound'
                             example:
-                                message: Fugiat unde.
+                                message: Optio repellat velit libero assumenda velit.
                 "500":
                     description: 'internalServerError: Errore nel server'
                     content:
@@ -175,7 +169,7 @@ paths:
                             schema:
                                 $ref: '#/components/schemas/InternalServerError'
                             example:
-                                message: Quae odit sunt mollitia a et excepturi.
+                                message: Sit quidem.
         get:
             tags:
                 - user
@@ -227,7 +221,7 @@ paths:
                             schema:
                                 $ref: '#/components/schemas/Unauthorized'
                             example:
-                                message: Possimus quam.
+                                message: Eos sit ullam.
                 "404":
                     description: 'notFound: Dato non trovato all''interno del sistema'
                     content:
@@ -235,7 +229,7 @@ paths:
                             schema:
                                 $ref: '#/components/schemas/NotFound'
                             example:
-                                message: Sit quis.
+                                message: Laborum nulla sapiente.
                 "500":
                     description: 'internalServerError: Errore nel server'
                     content:
@@ -243,7 +237,7 @@ paths:
                             schema:
                                 $ref: '#/components/schemas/InternalServerError'
                             example:
-                                message: Sapiente ea voluptatibus quo accusantium in.
+                                message: Vero ex cupiditate inventore.
         put:
             tags:
                 - user
@@ -307,7 +301,7 @@ paths:
                             schema:
                                 $ref: '#/components/schemas/Unauthorized'
                             example:
-                                message: Facilis quos soluta nostrum.
+                                message: Beatae et mollitia.
                 "404":
                     description: 'notFound: Dato non trovato all''interno del sistema'
                     content:
@@ -315,7 +309,7 @@ paths:
                             schema:
                                 $ref: '#/components/schemas/NotFound'
                             example:
-                                message: Sapiente modi omnis maxime est voluptate.
+                                message: Ut dolores ex omnis culpa repudiandae.
                 "500":
                     description: 'internalServerError: Errore nel server'
                     content:
@@ -323,7 +317,7 @@ paths:
                             schema:
                                 $ref: '#/components/schemas/InternalServerError'
                             example:
-                                message: Reiciendis cumque et et.
+                                message: Quae occaecati deleniti a est.
 components:
     schemas:
         BadRequest:
@@ -410,10 +404,10 @@ components:
                     type: string
                     description: Descrizione dell'errore
                     default: Errore di comunicazione con il server
-                    example: A provident ut quidem inventore ex et.
+                    example: Laudantium sit sed voluptates et sit.
             description: Errore nel server
             example:
-                message: Quas minus saepe rerum beatae voluptates.
+                message: A quos dolor assumenda voluptatem et libero.
             required:
                 - message
         NotFound:
@@ -423,10 +417,10 @@ components:
                     type: string
                     description: Descrizione dell'errore
                     default: Dato non trovato
-                    example: In est eos rerum nesciunt nam.
+                    example: Aut qui.
             description: 'Dato non trovato all''interno del sistema '
             example:
-                message: Accusantium tenetur et ex quia enim velit.
+                message: Recusandae corrupti autem.
             required:
                 - message
         Unauthorized:
@@ -436,10 +430,10 @@ components:
                     type: string
                     description: Descrizione dell'errore
                     default: Utente già registrato a
-                    example: Dolor sed.
+                    example: Quasi voluptates non.
             description: Errore di autenticazione non riuscita
             example:
-                message: Quasi alias aperiam est.
+                message: Occaecati dignissimos totam eos ut aut sint.
             required:
                 - message
         User:
@@ -485,7 +479,5 @@ components:
                 - firstName
                 - lastName
 tags:
-    - name: FileStore
-      description: The FileStore service handles file management
     - name: user
       description: User service for managing users
