@@ -22,7 +22,6 @@ var _ = API("aion_service", func() {
 
 })
 
-
 // User
 // - Service
-var userService = services.UserService
+var _ = services.UserService
