@@ -1,12 +1,16 @@
 package config
 
 import (
+	userGenSvr "aion/gen/http/user/server"
 	userGen "aion/gen/user"
 	userService "aion/internal/user"
+	"aion/internal/utils"
 	"context"
+	"net/http"
 
 	"goa.design/clue/debug"
 	"goa.design/clue/log"
+	goahttp "goa.design/goa/v3/http"
 )
 
 type EndpointName string
@@ -17,9 +21,10 @@ const (
 )
 
 type ServiceConfig struct {
-	EndpointName EndpointName                      // The name of the endpoint (used as a key in the map)
-	NewService   func() interface{}                // Function to create a new service instance
-	NewEndpoints func(svc interface{}) interface{} // Function to create endpoints for the service
+	EndpointName EndpointName
+	NewService   func() interface{}
+	NewEndpoints func(svc interface{}) interface{}
+	Mount        func(mux goahttp.Muxer, endpoints interface{}, eh func(context.Context, http.ResponseWriter, error))
 }
 
 func withUserService() ServiceConfig {
@@ -27,24 +32,61 @@ func withUserService() ServiceConfig {
 		EndpointName: UserEndPoint,
 		NewService:   func() interface{} { return userService.NewService() },
 		NewEndpoints: func(svc interface{}) interface{} {
-			endpoints := userGen.NewEndpoints(svc.(userGen.Service))
+			userSvc := svc.(userGen.Service)
+			endpoints := userGen.NewEndpoints(userSvc)
 			endpoints.Use(debug.LogPayloads())
 			endpoints.Use(log.Endpoint)
 			return endpoints
 		},
+		Mount: func(mux goahttp.Muxer, endpoints interface{}, eh func(context.Context, http.ResponseWriter, error)) {
+			userEndpoints := endpoints.(*userGen.Endpoints)
+			server := userGenSvr.New(userEndpoints, mux, goahttp.RequestDecoder, goahttp.ResponseEncoder, eh, nil)
+			userGenSvr.Mount(mux, server)
+		},
 	}
 }
 
-func InitializeServices(ctx context.Context) map[EndpointName]interface{} {
-	userConfig := withUserService()
-	epsMap := make(map[EndpointName]interface{})
-	
-	services := []ServiceConfig{userConfig}
-	for _, serviceConfig := range services {
-		svc := serviceConfig.NewService()              // Create a new service instance
-		endpoints := serviceConfig.NewEndpoints(svc)   // Generate endpoints for the service
-		epsMap[serviceConfig.EndpointName] = endpoints // Add the endpoints to the map with the endpoint name as the key
+func InitializeMuxer(ctx context.Context, enableDebug bool) goahttp.Muxer {
+	mux := goahttp.NewMuxer()
+	eh := errorHandler(ctx)
+
+	mountServices(mux, eh)
+
+	if enableDebug {
+		debug.MountPprofHandlers(debug.Adapt(mux))
+		debug.MountDebugLogEnabler(debug.Adapt(mux))
 	}
 
-	return epsMap // Return the map containing all initialized service endpoints
+	mux.Handle("GET", "/healthz", healthCheckHandler)
+
+	return mux
+}
+
+func mountServices(mux goahttp.Muxer, eh func(context.Context, http.ResponseWriter, error)) {
+	services := []ServiceConfig{
+		withUserService(),
+	}
+
+	for _, service := range services {
+		svc := service.NewService()
+		endpoints := service.NewEndpoints(svc)
+		service.Mount(mux, endpoints, eh)
+	}
+}
+
+func healthCheckHandler(w http.ResponseWriter, r *http.Request) {
+	if r.Method != http.MethodGet {
+		w.WriteHeader(http.StatusMethodNotAllowed)
+		_, _ = w.Write([]byte("Method Not Allowed"))
+		return
+	}
+	w.WriteHeader(http.StatusOK)
+	_, _ = w.Write([]byte("OK"))
+}
+
+func errorHandler(ctx context.Context) func(context.Context, http.ResponseWriter, error) {
+	return func(_ context.Context, w http.ResponseWriter, err error) {
+		utils.Log.Error(ctx, w, err)
+		log.Printf(ctx, "ERROR: %s", err.Error())
+	}
 }

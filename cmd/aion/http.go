@@ -1,8 +1,6 @@
 package main
 
 import (
-	userGenSvr "aion/gen/http/user/server"
-	userGen "aion/gen/user"
 	"aion/internal/config"
 	"aion/internal/utils"
 	"context"
@@ -19,43 +17,13 @@ import (
 	"goa.design/clue/debug"
 )
 
-func withMuxer(ctx context.Context, dbg bool, epsMap map[config.EndpointName]interface{}) (mux goahttp.Muxer) {
-
-	var (
-		enc = goahttp.ResponseEncoder
-		dec = goahttp.RequestDecoder
-	)
-
-	mux = goahttp.NewMuxer()
-
-	if dbg {
-		debug.MountPprofHandlers(debug.Adapt(mux))
-		debug.MountDebugLogEnabler(debug.Adapt(mux))
-	}
-
-	eh := errorHandler(ctx)
-
-	withMountedService(ctx, mux, dec, enc, eh, epsMap)
-
-	mux.Handle("GET", "/healthz", func(w http.ResponseWriter, r *http.Request) {
-		if r.Method != http.MethodGet {
-			w.WriteHeader(http.StatusMethodNotAllowed)
-			_, _ = w.Write([]byte("Method Not Allowed"))
-		}
-		w.WriteHeader(http.StatusOK)
-		_, _ = w.Write([]byte("OK"))
-	})
-
-	return
-}
-
-func HandleHttpServer(ctx context.Context, u *url.URL, wg *sync.WaitGroup, errc chan error, dbg bool, epsMap map[config.EndpointName]interface{}) {
+func HandleHttpServer(ctx context.Context, u *url.URL, wg *sync.WaitGroup, errc chan error, dbg bool, ) {
 	var handler http.Handler
-	var mux goahttp.Muxer = withMuxer(ctx, dbg, epsMap)
+	var mux goahttp.Muxer = config.InitializeMuxer(ctx, dbg)
 	mux = withDocsHandler(mux)
 	handler = mux
 	handler = withErrorHandler(handler, ctx)
-	handler = enableCORS(handler)
+	handler = withCORS(handler)
 
 	if dbg {
 		handler = debug.HTTP()(handler)
@@ -107,7 +75,7 @@ func withErrorHandler(handler http.Handler, logCtx context.Context) http.Handler
 	})
 }
 
-func enableCORS(h http.Handler) http.Handler {
+func withCORS(h http.Handler) http.Handler {
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		w.Header().Set("Access-Control-Allow-Origin", "*")
 		w.Header().Set("Access-Control-Allow-Methods", "GET, POST, PUT, DELETE, OPTIONS")
@@ -120,27 +88,6 @@ func enableCORS(h http.Handler) http.Handler {
 		}
 		h.ServeHTTP(w, r)
 	})
-}
-
-func errorHandler(logCtx context.Context) func(context.Context, http.ResponseWriter, error) {
-	return func(ctx context.Context, w http.ResponseWriter, err error) {
-		utils.Log.Error(logCtx, w, err)
-		log.Printf(logCtx, "ERROR: %s", err.Error())
-	}
-}
-
-func withMountedService(ctx context.Context, mux goahttp.Muxer, dec func(*http.Request) goahttp.Decoder, enc func(context.Context, http.ResponseWriter) goahttp.Encoder, eh func(context.Context, http.ResponseWriter, error), epsMap map[config.EndpointName]interface{}) {
-	var userGenServer *userGenSvr.Server
-
-	for name, eps := range epsMap {
-		switch name {
-		case config.UserEndPoint:
-			userEndpoints := eps.(*userGen.Endpoints)
-			userGenServer = userGenSvr.New(userEndpoints, mux, dec, enc, eh, nil)
-			userGenSvr.Mount(mux, userGenServer)
-		}
-
-	}
 }
 
 // withDocsHandler sets up HTTP handlers for serving Swagger UI, OpenAPI spec, and API documentation.
