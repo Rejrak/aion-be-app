@@ -23,7 +23,7 @@ func (r *Repository) FindByID(ctx context.Context, userID string) (*models.User,
 	var userModel models.User
 	if err := r.DB.WithContext(ctx).Where("id = ?", userID).First(&userModel).Error; err != nil {
 		if errors.Is(err, gorm.ErrRecordNotFound) {
-			return nil, errors.New("user not found")
+			return nil, gorm.ErrRecordNotFound
 		}
 		return nil, errors.New("errore di comunicazione [DB-FU]")
 	}

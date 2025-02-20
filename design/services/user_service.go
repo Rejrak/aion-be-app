@@ -6,7 +6,6 @@ import (
 	. "goa.design/goa/v3/dsl"
 )
 
-// Definizione del tipo User in Goa DSL
 var User = Type("User", func() {
 	Attribute("id", String, "Unique ID of the user", func() {
 		Example("f47ac10b-58cc-4372-a567-0e02b2c3d479")
@@ -61,7 +60,6 @@ var UserService = Service("user", func() {
 	HTTP(func() {
 		Path("/user")
 	})
-
 	Error("unauthorized", errors.Unauthorized, "Autenticazione fallita")
 	Error("internalServerError", errors.InternalServerError, "Errore nel server")
 	Error("notFound", errors.NotFound, "Dato non trovato all'interno del sistema")
@@ -172,90 +170,3 @@ var UserService = Service("user", func() {
 		})
 	})
 })
-
-//var UserService = Service("user", func() {
-//	Description("The user service handles user management")
-//
-//	HTTP(func() {
-//		Path("/users")
-//	})
-//
-// Error("unauthorized", errors.Unauthorized, "Autenticazione fallita")
-// Error("internalServerError", errors.InternalServerError, "Errore nel server")
-// Error("notFound", errors.NotFound, "Dato non trovato all'interno del sistema")
-// Error("badRequest", errors.BadRequest, "Parametri non validi")
-//
-//	Method("create", func() {
-//		Description("Create a new user")
-//		Payload(payloads.CreateUserPayload)
-//		Result(responses.UserDetailResponse)
-//		HTTP(func() {
-//			POST("/")
-//			Response(StatusCreated)
-//			errors.CommonResponses()
-//		})
-//	})
-//
-//	Method("read", func() {
-//		Description("Get a user by ID")
-//		Payload(func() {
-//			Attribute("id", String, "ID of the user", func() {
-//				Format(FormatUUID)
-//				Example("f47ac10b-58cc-4372-a567-0e02b2c3d479")
-//			})
-//			Required("id")
-//		})
-//		Result(responses.UserDetailResponse)
-//		HTTP(func() {
-//			GET("/{id}")
-//			Response(StatusOK)
-//			errors.CommonResponses()
-//		})
-//	})
-//
-//	Method("update", func() {
-//		Description("Update an existing user")
-//		Payload(payloads.UpdateUserPayload)
-//		Result(responses.UserDetailResponse)
-//		HTTP(func() {
-//			PUT("/{id}")
-//			Response(StatusOK)
-//			errors.CommonResponses()
-//		})
-//	})
-//
-//	Method("delete", func() {
-//		Description("Delete a user by ID")
-//		Payload(func() {
-//			Attribute("id", String, "ID of the user", func() {
-//				Format(FormatUUID)
-//				Example("f47ac10b-58cc-4372-a567-0e02b2c3d479")
-//			})
-//			Required("id")
-//		})
-//		HTTP(func() {
-//			DELETE("/{id}")
-//			Response(StatusNoContent)
-//			errors.CommonResponses()
-//		})
-//	})
-//
-//	Method("list", func() {
-//		Description("List all users")
-//		Payload(payloads.UserListPayload)
-//		Result(responses.UserListResponse)
-//		HTTP(func() {
-//			GET("/")
-//			Response(StatusOK)
-//			Param("limit")
-//			Param("offset")
-//			Param("order_by")
-//			Param("order_dir")
-//			Param("first_name")
-//			Param("last_name")
-//			Param("email")
-//			Param("active")
-//			errors.CommonResponses()
-//		})
-//	})
-//})

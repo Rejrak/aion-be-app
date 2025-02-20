@@ -3,6 +3,7 @@ package user
 import (
 	"aion/internal/database/db"
 	"aion/internal/database/models"
+	"aion/internal/utils"
 	"context"
 	"errors"
 	"os"
@@ -146,11 +147,14 @@ func (s *Service) Create(ctx context.Context, payload *userService.CreateUserPay
 // Get restituisce un utente dal database
 func (s *Service) Get(ctx context.Context, payload *userService.GetPayload) (*userService.User, error) {
 	user, err := s.Repository.FindByID(ctx, payload.ID)
+
 	if err != nil {
-		if errors.Is(err, gorm.ErrRecordNotFound) {
-			return nil, &userService.NotFound{Message: "Utente non trovato"}
+		if err == gorm.ErrRecordNotFound {
+			err := &userService.NotFound{Message: "Utente non trovato"}
+			utils.Log.Info(ctx, err)
+			return nil, err
 		}
-		return nil, err
+		return nil, &userService.NotFound{Message: "Utente non trovato"}
 	}
 
 	return &userService.User{
