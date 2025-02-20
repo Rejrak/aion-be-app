@@ -19,9 +19,9 @@ func main() {
 	srvConf := servConfig.LoadServerConfig() // Load server configuration settings from a config file or environment variables.
 
 	// Set up logging format based on whether the output is a terminal or a file.
-	format := log.FormatText
+	format := log.FormatJSON
 	if log.IsTerminal() {
-		format = log.FormatText
+		format = log.FormatTerminal
 	}
 
 	// Create a context for the application with logging format and debug settings.
@@ -49,12 +49,12 @@ func main() {
 	switch srvConf.Domain {
 	case "development":
 		db.ConnectDb()
-		u := srvConf.BuildServerURL(srvConf, ctx)                  // Build server URL based on configuration
+		u := srvConf.BuildServerURL(srvConf, ctx)          // Build server URL based on configuration
 		HandleHttpServer(ctx, u, &wg, errc, srvConf.Debug) // Start the HTTP server for development
 
 	case "production":
-		db.ConnectDb()                                             // Connect to the database for production
-		u := srvConf.BuildServerURL(srvConf, ctx)                  // Build server URL based on configuration
+		db.ConnectDb()                                     // Connect to the database for production
+		u := srvConf.BuildServerURL(srvConf, ctx)          // Build server URL based on configuration
 		HandleHttpServer(ctx, u, &wg, errc, srvConf.Debug) // Start the HTTP server for production
 
 	default:
