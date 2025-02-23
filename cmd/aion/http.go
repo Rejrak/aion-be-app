@@ -17,6 +17,12 @@ import (
 	"goa.design/clue/debug"
 )
 
+const (
+	swaggerPath = "./static/swagger.html"
+	redocPath   = "./static/redoc.html"
+	openApiPath = "./static/openapi3.yaml"
+)
+
 func HandleHttpServer(ctx context.Context, u *url.URL, wg *sync.WaitGroup, errc chan error, dbg bool) {
 	var handler http.Handler
 	var mux goahttp.Muxer = config.InitializeMuxer(ctx, dbg)
@@ -93,13 +99,9 @@ func withCORS(h http.Handler) http.Handler {
 // withDocsHandler sets up HTTP handlers for serving Swagger UI, OpenAPI spec, and API documentation.
 // It registers routes for serving static files and dynamically generated documentation pages.
 func withDocsHandler(mux goahttp.Muxer) goahttp.Muxer {
-	fs := http.FileServer(http.Dir("./swagger-ui"))
-	mux.Handle("GET", "/swagger-ui/*", func(w http.ResponseWriter, r *http.Request) {
-		http.StripPrefix("/swagger-ui/", fs).ServeHTTP(w, r)
-	})
 
 	mux.Handle("GET", "/openapi3.yaml", func(w http.ResponseWriter, r *http.Request) {
-		http.ServeFile(w, r, "./static/openapi3.yaml")
+		http.ServeFile(w, r, openApiPath)
 	})
 
 	mux.Handle("GET", "/docs/swagger", func(w http.ResponseWriter, r *http.Request) {
@@ -127,8 +129,7 @@ func withDocsHandler(mux goahttp.Muxer) goahttp.Muxer {
 }
 
 func withRedoc() ([]byte, error) {
-	filePath := "./static/redoc.html"
-	fileContent, err := os.ReadFile(filePath)
+	fileContent, err := os.ReadFile(redocPath)
 	if err != nil {
 		fmt.Printf("Error Reading Redoc: %v\n", err)
 		return nil, err
@@ -137,8 +138,7 @@ func withRedoc() ([]byte, error) {
 }
 
 func withSwagger() ([]byte, error) {
-	filePath := "./static/swagger.html"
-	fileContent, err := os.ReadFile(filePath)
+	fileContent, err := os.ReadFile(swaggerPath)
 	if err != nil {
 		fmt.Printf("Error Reading Redoc: %v\n", err)
 		return nil, err

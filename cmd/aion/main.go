@@ -13,6 +13,11 @@ import (
 	"goa.design/clue/log"
 )
 
+const (
+	fromDocsPath = "./gen/http/openapi3.yaml"
+	docsPath   = "./static/openapi3.yaml"
+)
+
 // main is the entry point for the application.
 // It loads the server configuration, initializes services, and handles environment-specific setups.
 func main() {
@@ -37,7 +42,7 @@ func main() {
 	go handleSignals(errc) // Start goroutine to listen for OS signals (e.g., SIGINT, SIGTERM)
 
 	go func() {
-		if err := moveFile("./gen/http/openapi3.yaml", "./static/openapi3.yaml"); err != nil {
+		if err := moveFile(fromDocsPath, docsPath); err != nil {
 			log.Debugf(ctx, "error: %v", err)
 		}
 	}()
