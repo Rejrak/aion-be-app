@@ -15,53 +15,30 @@ import (
 
 const (
 	fromDocsPath = "./gen/http/openapi3.yaml"
-	docsPath   = "./static/openapi3.yaml"
+	docsPath     = "./static/openapi3.yaml"
 )
 
-// main is the entry point for the application.
-// It loads the server configuration, initializes services, and handles environment-specific setups.
 func main() {
-	srvConf := servConfig.LoadServerConfig() // Load server configuration settings from a config file or environment variables.
-
-	// Set up logging format based on whether the output is a terminal or a file.
-	format := log.FormatJSON
-	if log.IsTerminal() {
-		format = log.FormatTerminal
-	}
-
-	// Create a context for the application with logging format and debug settings.
-	ctx := log.Context(context.Background(), log.WithFormat(format))
-	if srvConf.Debug {
-		ctx = log.Context(ctx, log.WithDebug()) // Enable debug logs if debug mode is set
-		log.Debugf(ctx, "debug logs enabled")
-	}
-
-	var wg sync.WaitGroup    // WaitGroup to manage goroutines
-	errc := make(chan error) // Error channel to listen for fatal errors
+	srvConf := servConfig.LoadServerConfig()
+	ctx := setupLoggingContext(srvConf.Debug)
+	var wg sync.WaitGroup
+	errc := make(chan error)
 
 	go handleSignals(errc) // Start goroutine to listen for OS signals (e.g., SIGINT, SIGTERM)
 
-	go func() {
-		if err := moveFile(fromDocsPath, docsPath); err != nil {
-			log.Debugf(ctx, "error: %v", err)
-		}
-	}()
+	if err := moveFile(fromDocsPath, docsPath); err != nil {
+		log.Debugf(ctx, "error: %v", err)
+	}
 
 	// Create a cancellable context to manage server shutdown.
 	ctx, cancel := context.WithCancel(ctx)
+	defer cancel() //Ensure the context is canceled to release resources
 
-	// Set up environment-specific configurations
 	switch srvConf.Domain {
 	case "development":
-		db.ConnectDb()
-		u := srvConf.BuildServerURL(srvConf, ctx)          // Build server URL based on configuration
-		HandleHttpServer(ctx, u, &wg, errc, srvConf.Debug) // Start the HTTP server for development
-
+		setupEnvironment(ctx, srvConf, &wg, errc) // Start the HTTP server for development
 	case "production":
-		db.ConnectDb()                                     // Connect to the database for production
-		u := srvConf.BuildServerURL(srvConf, ctx)          // Build server URL based on configuration
-		HandleHttpServer(ctx, u, &wg, errc, srvConf.Debug) // Start the HTTP server for production
-
+		setupEnvironment(ctx, srvConf, &wg, errc) // Start the HTTP server for production
 	default:
 		log.Fatal(ctx, fmt.Errorf("invalid host argument: %q (valid hosts: development|production)", srvConf.Domain)) // Fatal error for invalid domain
 	}
@@ -81,11 +58,31 @@ func handleSignals(errc chan error) {
 	errc <- fmt.Errorf("%s", <-c)                     // Send the received signal to the error channel as a formatted error
 }
 
+func setupEnvironment(ctx context.Context, srvConf *servConfig.ServerConfig, wg *sync.WaitGroup, errc chan error) {
+	db.ConnectDb()
+	u := srvConf.BuildServerURL(srvConf, ctx)         // Build server URL based on configuration
+	HandleHttpServer(ctx, u, wg, errc, srvConf.Debug) // Start the HTTP server for development
+}
+
+func setupLoggingContext(debug bool) context.Context {
+	format := log.FormatJSON
+
+	if log.IsTerminal() {
+		format = log.FormatTerminal
+	}
+	ctx := log.Context(context.Background(), log.WithFormat(format))
+	if debug {
+		ctx = log.Context(ctx, log.WithDebug())
+		log.Debugf(ctx, "debug logs enabled")
+	}
+	return ctx
+}
+
 // moveFile moves a file from src to dst. If the destination file exists, it will be overwritten.
 func moveFile(src, dst string) error {
 	input, err := os.ReadFile(src)
 	if err != nil {
-		return fmt.Errorf("failed to read source file: %w", err)
+		return fmt.Errorf("failed to read source file or already moved: %w", err)
 	}
 
 	err = os.WriteFile(dst, input, 0644)
