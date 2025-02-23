@@ -6,109 +6,26 @@ import (
 	"be/internal/utils"
 	"context"
 	"errors"
-	"os"
 
 	userService "be/gen/user"
 
-	"github.com/Nerzal/gocloak/v13"
 	"github.com/google/uuid"
 	"gorm.io/gorm"
 )
 
 type Service struct {
-	Repository   *Repository
-	ctx          context.Context
-	client       *gocloak.GoCloak
-	clientID     string
-	clientSecret string
-	realm        string
+	Repository *Repository
+	// kcClient   *KeyCloak
 }
 
 func NewService() *Service {
 	var (
-		aionDB   = db.DB.AionDB
-		client   = gocloak.NewClient("https://auth.nekos.app")
-		kcClient = os.Getenv("KC_CLIENT_ID")
-		kcSecret = os.Getenv("KC_CLIENT_SECRET")
-		kcRealm  = os.Getenv("KC_REALM")
+		aionDB = db.DB.AionDB
 	)
 	return &Service{
-		client:       client,
-		clientID:     kcClient,
-		clientSecret: kcSecret,
-		realm:        kcRealm,
-		Repository:   NewUserRepository(aionDB),
+		// kcClient:   NewKCervice(),
+		Repository: NewUserRepository(aionDB),
 	}
-}
-
-func (s *Service) GetToken(ctx context.Context) (*gocloak.JWT, error) {
-	token, err := s.client.LoginClient(ctx, s.clientID, s.clientSecret, s.realm)
-	if err != nil {
-		rsp := errors.New("errore di comunicazione [DB-FU]")
-		return nil, rsp
-	}
-	return token, nil
-}
-
-func (s *Service) KcCreate(ctx context.Context, userModel models.User, password string) (uuid *string, err error) {
-	token, err := s.GetToken(ctx)
-	if err != nil {
-		return nil, errors.New("errore di comunicazione [KC-TK]")
-	}
-
-	kcUser := gocloak.User{
-		Username:      gocloak.StringP(userModel.Nickname),
-		Enabled:       gocloak.BoolP(true),
-		EmailVerified: gocloak.BoolP(true),
-		FirstName:     (*string)(&userModel.FirstName),
-		LastName:      (*string)(&userModel.LastName),
-	}
-
-	userID, err := s.client.CreateUser(ctx, token.AccessToken, s.realm, kcUser)
-	if err != nil {
-		return nil, errors.New("user already exists")
-	}
-
-	if err := s.client.SetPassword(ctx, token.AccessToken, userID, s.realm, password, false); err != nil {
-		return nil, errors.New("errore di comunicazione [KC-SP]")
-	}
-
-	uuid = &userID
-
-	return
-}
-
-func (s *Service) KcUpdate(ctx context.Context, firstName, lastName *string, uuid string) (err error) {
-	token, err := s.GetToken(ctx)
-	if err != nil {
-		return err
-	}
-
-	kcUser := gocloak.User{ID: &uuid}
-	if firstName != nil && *firstName != "" {
-		kcUser.FirstName = firstName
-	}
-	if lastName != nil && *lastName != "" {
-		kcUser.LastName = lastName
-	}
-
-	if err := s.client.UpdateUser(ctx, token.AccessToken, s.realm, kcUser); err != nil {
-		return errors.New("errore di comunicazione [KC-UU]")
-	}
-
-	return nil
-}
-
-func (s *Service) KcDelete(ctx context.Context, uuid string) error {
-	token, err := s.GetToken(ctx)
-	if err != nil {
-		return errors.New("errore di comunicazione [KC-TK]")
-	}
-
-	if err := s.client.DeleteUser(ctx, token.AccessToken, s.realm, uuid); err != nil {
-		return errors.New("errore di comunicazione [KC-DU]")
-	}
-	return nil
 }
 
 // Create crea un nuovo utente sia in Keycloak che nel database
@@ -121,12 +38,6 @@ func (s *Service) Create(ctx context.Context, payload *userService.CreateUserPay
 		Nickname:  *payload.Nickname,
 		Admin:     payload.Admin,
 	}
-
-	userID, err := s.KcCreate(ctx, userModel, "defaultPassword123!")
-	if err != nil {
-		return nil, err
-	}
-	userModel.KCID = uuid.MustParse(*userID)
 
 	// Salvataggio nel database
 	savedModel, err := s.Repository.SaveUser(ctx, userModel)
@@ -213,10 +124,10 @@ func (s *Service) Update(ctx context.Context, payload *userService.UpdatePayload
 	}
 
 	// Aggiorna in Keycloak
-	err = s.KcUpdate(ctx, &payload.FirstName, &payload.LastName, payload.KcID)
-	if err != nil {
-		return nil, err
-	}
+	// err = s.KcUpdate(ctx, &payload.FirstName, &payload.LastName, payload.KcID)
+	// if err != nil {
+	// 	return nil, err
+	// }
 
 	return &userService.User{
 		ID:        user.KCID.String(),
@@ -240,10 +151,10 @@ func (s *Service) Delete(ctx context.Context, payload *userService.DeletePayload
 	}
 
 	// Cancella da Keycloak
-	err = s.KcDelete(ctx, user.KCID.String())
-	if err != nil {
-		return err
-	}
+	// err = s.KcDelete(ctx, user.KCID.String())
+	// if err != nil {
+	// 	return err
+	// }
 
 	// Cancella dal database
 	err = s.Repository.DeleteUser(ctx, user.KCID.String())
