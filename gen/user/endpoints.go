@@ -3,7 +3,7 @@
 // user endpoints
 //
 // Command:
-// $ goa gen aion/design
+// $ goa gen be/design
 
 package user
 

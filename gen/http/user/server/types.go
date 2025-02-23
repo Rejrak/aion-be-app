@@ -3,12 +3,12 @@
 // user HTTP server types
 //
 // Command:
-// $ goa gen aion/design
+// $ goa gen be/design
 
 package server
 
 import (
-	user "aion/gen/user"
+	user "be/gen/user"
 
 	goa "goa.design/goa/v3/pkg"
 )

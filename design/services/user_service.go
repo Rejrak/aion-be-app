@@ -1,7 +1,7 @@
 package services
 
 import (
-	"aion/design/errors"
+	"be/design/errors"
 
 	. "goa.design/goa/v3/dsl"
 )

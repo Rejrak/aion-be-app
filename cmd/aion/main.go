@@ -1,8 +1,8 @@
 package main
 
 import (
-	servConfig "aion/internal/config"
-	"aion/internal/database/db"
+	servConfig "be/internal/config"
+	"be/internal/database/db"
 	"context"
 	"fmt"
 	"os"

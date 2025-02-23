@@ -3,12 +3,12 @@
 // user HTTP server encoders and decoders
 //
 // Command:
-// $ goa gen aion/design
+// $ goa gen be/design
 
 package server
 
 import (
-	user "aion/gen/user"
+	user "be/gen/user"
 	"context"
 	"errors"
 	"io"

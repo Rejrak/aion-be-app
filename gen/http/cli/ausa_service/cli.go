@@ -3,12 +3,12 @@
 // ausa_service HTTP client CLI support package
 //
 // Command:
-// $ goa gen aion/design
+// $ goa gen be/design
 
 package cli
 
 import (
-	userc "aion/gen/http/user/client"
+	userc "be/gen/http/user/client"
 	"flag"
 	"fmt"
 	"net/http"

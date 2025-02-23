@@ -1,14 +1,14 @@
 package user
 
 import (
-	"aion/internal/database/db"
-	"aion/internal/database/models"
-	"aion/internal/utils"
+	"be/internal/database/db"
+	"be/internal/database/models"
+	"be/internal/utils"
 	"context"
 	"errors"
 	"os"
 
-	userService "aion/gen/user"
+	userService "be/gen/user"
 
 	"github.com/Nerzal/gocloak/v13"
 	"github.com/google/uuid"

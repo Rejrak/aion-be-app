@@ -2,7 +2,7 @@
 package design
 
 import (
-	"aion/design/services"
+	"be/design/services"
 
 	. "goa.design/goa/v3/dsl"
 )

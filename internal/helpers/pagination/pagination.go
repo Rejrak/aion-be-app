@@ -1,7 +1,7 @@
 package pagination
 
 import (
-	"aion/internal/utils"
+	"be/internal/utils"
 	"errors"
 	"fmt"
 	"strings"

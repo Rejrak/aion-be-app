@@ -1,8 +1,8 @@
 package user
 
 import (
-	"aion/internal/database/models"
-	"aion/internal/utils"
+	"be/internal/database/models"
+	"be/internal/utils"
 	"context"
 	"errors"
 

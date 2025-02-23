@@ -1,7 +1,7 @@
 package db
 
 import (
-	"aion/internal/database/models"
+	"be/internal/database/models"
 	"fmt"
 	"log"
 	"os"

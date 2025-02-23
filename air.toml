@@ -5,7 +5,7 @@ root = "/opt/app"
 tmp_dir = "/opt/app/tmp"
 
 [build]
-# Comando per compilare il backend in tmp/ (ora punta a ./cmd/aion/)
+# Comando per compilare il backend in tmp/ (ora punta a ./cmd/be/)
 cmd = "go build -buildvcs=false -o /opt/app/tmp/main /opt/app/cmd/aion"
 
 # Binario compilato

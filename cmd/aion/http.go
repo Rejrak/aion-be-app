@@ -1,8 +1,8 @@
 package main
 
 import (
-	"aion/internal/config"
-	"aion/internal/utils"
+	"be/internal/config"
+	"be/internal/utils"
 	"context"
 	"fmt"
 	"net/http"
@@ -17,7 +17,7 @@ import (
 	"goa.design/clue/debug"
 )
 
-func HandleHttpServer(ctx context.Context, u *url.URL, wg *sync.WaitGroup, errc chan error, dbg bool, ) {
+func HandleHttpServer(ctx context.Context, u *url.URL, wg *sync.WaitGroup, errc chan error, dbg bool) {
 	var handler http.Handler
 	var mux goahttp.Muxer = config.InitializeMuxer(ctx, dbg)
 	mux = withDocsHandler(mux)

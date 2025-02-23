@@ -1,10 +1,10 @@
 package config
 
 import (
-	userGenSvr "aion/gen/http/user/server"
-	userGen "aion/gen/user"
-	userService "aion/internal/user"
-	"aion/internal/utils"
+	userGenSvr "be/gen/http/user/server"
+	userGen "be/gen/user"
+	userService "be/internal/user"
+	"be/internal/utils"
 	"context"
 	"net/http"
 

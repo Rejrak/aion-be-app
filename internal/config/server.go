@@ -1,7 +1,7 @@
 package config
 
 import (
-	"aion/internal/utils"
+	"be/internal/utils"
 	"context"
 	"flag"
 	"fmt"
