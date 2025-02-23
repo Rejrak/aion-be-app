@@ -8,7 +8,15 @@
 package cli
 
 import (
+	exercisec "be/gen/http/exercise/client"
+	exerciseprogressc "be/gen/http/exerciseprogress/client"
+	musclegroupc "be/gen/http/musclegroup/client"
+	trainingplanc "be/gen/http/trainingplan/client"
 	userc "be/gen/http/user/client"
+	workoutc "be/gen/http/workout/client"
+	workoutexercisec "be/gen/http/workoutexercise/client"
+	workoutprogressc "be/gen/http/workoutprogress/client"
+	workouttypec "be/gen/http/workouttype/client"
 	"flag"
 	"fmt"
 	"net/http"
@@ -22,13 +30,45 @@ import (
 //
 //	command (subcommand1|subcommand2|...)
 func UsageCommands() string {
-	return `user (create|get|list|update|delete)
+	return `exerciseprogress (create|get|list|update|delete)
+exercise (create|get|list|update|delete)
+musclegroup (create|get|list|update|delete)
+trainingplan (create|get|list|update|delete)
+user (create|get|list|update|delete)
+workoutexercise (create|get|list|update|delete)
+workoutprogress (create|get|list|update|delete)
+workout (create|get|list|update|delete)
+workouttype (create|get|list|update|delete)
 `
 }
 
 // UsageExamples produces an example of a valid invocation of the CLI tool.
 func UsageExamples() string {
-	return os.Args[0] + ` user create --body '{
+	return os.Args[0] + ` exerciseprogress create --body '{
+      "actualDuration": 60,
+      "actualRepetitions": 10,
+      "actualWeight": 50,
+      "notes": "Felt strong",
+      "workoutExerciseId": "f47ac10b-58cc-4372-a567-0e02b2c3d485",
+      "workoutProgressId": "f47ac10b-58cc-4372-a567-0e02b2c3d486"
+   }'` + "\n" +
+		os.Args[0] + ` exercise create --body '{
+      "muscleGroupId": "f47ac10b-58cc-4372-a567-0e02b2c3d483",
+      "name": "Push Up"
+   }'` + "\n" +
+		os.Args[0] + ` musclegroup create --body '{
+      "description": "Group for chest exercises",
+      "name": "Chest"
+   }'` + "\n" +
+		os.Args[0] + ` trainingplan create --body '{
+      "description": "Descrizione del piano di allenamento",
+      "endDate": "2025-02-28T00:00:00Z",
+      "name": "Piano di Allenamento",
+      "startDate": "2025-02-01T00:00:00Z",
+      "userId": "f47ac10b-58cc-4372-a567-0e02b2c3d479",
+      "workoutTypeId": "f47ac10b-58cc-4372-a567-0e02b2c3d480"
+   }'` + "\n" +
+		os.Args[0] + ` user create --body '{
       "admin": false,
       "firstName": "John",
       "kcId": "550e8400-e29b-41d4-a716-446655440000",
@@ -48,6 +88,82 @@ func ParseEndpoint(
 	restore bool,
 ) (goa.Endpoint, any, error) {
 	var (
+		exerciseprogressFlags = flag.NewFlagSet("exerciseprogress", flag.ContinueOnError)
+
+		exerciseprogressCreateFlags    = flag.NewFlagSet("create", flag.ExitOnError)
+		exerciseprogressCreateBodyFlag = exerciseprogressCreateFlags.String("body", "REQUIRED", "")
+
+		exerciseprogressGetFlags  = flag.NewFlagSet("get", flag.ExitOnError)
+		exerciseprogressGetIDFlag = exerciseprogressGetFlags.String("id", "REQUIRED", "Exercise Progress ID")
+
+		exerciseprogressListFlags      = flag.NewFlagSet("list", flag.ExitOnError)
+		exerciseprogressListLimitFlag  = exerciseprogressListFlags.String("limit", "10", "")
+		exerciseprogressListOffsetFlag = exerciseprogressListFlags.String("offset", "", "")
+
+		exerciseprogressUpdateFlags    = flag.NewFlagSet("update", flag.ExitOnError)
+		exerciseprogressUpdateBodyFlag = exerciseprogressUpdateFlags.String("body", "REQUIRED", "")
+		exerciseprogressUpdateIDFlag   = exerciseprogressUpdateFlags.String("id", "REQUIRED", "Exercise Progress ID")
+
+		exerciseprogressDeleteFlags  = flag.NewFlagSet("delete", flag.ExitOnError)
+		exerciseprogressDeleteIDFlag = exerciseprogressDeleteFlags.String("id", "REQUIRED", "Exercise Progress ID")
+
+		exerciseFlags = flag.NewFlagSet("exercise", flag.ContinueOnError)
+
+		exerciseCreateFlags    = flag.NewFlagSet("create", flag.ExitOnError)
+		exerciseCreateBodyFlag = exerciseCreateFlags.String("body", "REQUIRED", "")
+
+		exerciseGetFlags  = flag.NewFlagSet("get", flag.ExitOnError)
+		exerciseGetIDFlag = exerciseGetFlags.String("id", "REQUIRED", "Exercise ID")
+
+		exerciseListFlags      = flag.NewFlagSet("list", flag.ExitOnError)
+		exerciseListLimitFlag  = exerciseListFlags.String("limit", "10", "")
+		exerciseListOffsetFlag = exerciseListFlags.String("offset", "", "")
+
+		exerciseUpdateFlags    = flag.NewFlagSet("update", flag.ExitOnError)
+		exerciseUpdateBodyFlag = exerciseUpdateFlags.String("body", "REQUIRED", "")
+		exerciseUpdateIDFlag   = exerciseUpdateFlags.String("id", "REQUIRED", "Exercise ID")
+
+		exerciseDeleteFlags  = flag.NewFlagSet("delete", flag.ExitOnError)
+		exerciseDeleteIDFlag = exerciseDeleteFlags.String("id", "REQUIRED", "Exercise ID")
+
+		musclegroupFlags = flag.NewFlagSet("musclegroup", flag.ContinueOnError)
+
+		musclegroupCreateFlags    = flag.NewFlagSet("create", flag.ExitOnError)
+		musclegroupCreateBodyFlag = musclegroupCreateFlags.String("body", "REQUIRED", "")
+
+		musclegroupGetFlags  = flag.NewFlagSet("get", flag.ExitOnError)
+		musclegroupGetIDFlag = musclegroupGetFlags.String("id", "REQUIRED", "Muscle Group ID")
+
+		musclegroupListFlags      = flag.NewFlagSet("list", flag.ExitOnError)
+		musclegroupListLimitFlag  = musclegroupListFlags.String("limit", "10", "")
+		musclegroupListOffsetFlag = musclegroupListFlags.String("offset", "", "")
+
+		musclegroupUpdateFlags    = flag.NewFlagSet("update", flag.ExitOnError)
+		musclegroupUpdateBodyFlag = musclegroupUpdateFlags.String("body", "REQUIRED", "")
+		musclegroupUpdateIDFlag   = musclegroupUpdateFlags.String("id", "REQUIRED", "Muscle Group ID")
+
+		musclegroupDeleteFlags  = flag.NewFlagSet("delete", flag.ExitOnError)
+		musclegroupDeleteIDFlag = musclegroupDeleteFlags.String("id", "REQUIRED", "Muscle Group ID")
+
+		trainingplanFlags = flag.NewFlagSet("trainingplan", flag.ContinueOnError)
+
+		trainingplanCreateFlags    = flag.NewFlagSet("create", flag.ExitOnError)
+		trainingplanCreateBodyFlag = trainingplanCreateFlags.String("body", "REQUIRED", "")
+
+		trainingplanGetFlags  = flag.NewFlagSet("get", flag.ExitOnError)
+		trainingplanGetIDFlag = trainingplanGetFlags.String("id", "REQUIRED", "Training plan ID")
+
+		trainingplanListFlags      = flag.NewFlagSet("list", flag.ExitOnError)
+		trainingplanListLimitFlag  = trainingplanListFlags.String("limit", "10", "")
+		trainingplanListOffsetFlag = trainingplanListFlags.String("offset", "", "")
+
+		trainingplanUpdateFlags    = flag.NewFlagSet("update", flag.ExitOnError)
+		trainingplanUpdateBodyFlag = trainingplanUpdateFlags.String("body", "REQUIRED", "")
+		trainingplanUpdateIDFlag   = trainingplanUpdateFlags.String("id", "REQUIRED", "Unique ID of the training plan")
+
+		trainingplanDeleteFlags  = flag.NewFlagSet("delete", flag.ExitOnError)
+		trainingplanDeleteIDFlag = trainingplanDeleteFlags.String("id", "REQUIRED", "Training plan ID")
+
 		userFlags = flag.NewFlagSet("user", flag.ContinueOnError)
 
 		userCreateFlags    = flag.NewFlagSet("create", flag.ExitOnError)
@@ -66,13 +182,145 @@ func ParseEndpoint(
 
 		userDeleteFlags  = flag.NewFlagSet("delete", flag.ExitOnError)
 		userDeleteIDFlag = userDeleteFlags.String("id", "REQUIRED", "User ID")
+
+		workoutexerciseFlags = flag.NewFlagSet("workoutexercise", flag.ContinueOnError)
+
+		workoutexerciseCreateFlags    = flag.NewFlagSet("create", flag.ExitOnError)
+		workoutexerciseCreateBodyFlag = workoutexerciseCreateFlags.String("body", "REQUIRED", "")
+
+		workoutexerciseGetFlags  = flag.NewFlagSet("get", flag.ExitOnError)
+		workoutexerciseGetIDFlag = workoutexerciseGetFlags.String("id", "REQUIRED", "Workout Exercise ID")
+
+		workoutexerciseListFlags      = flag.NewFlagSet("list", flag.ExitOnError)
+		workoutexerciseListLimitFlag  = workoutexerciseListFlags.String("limit", "10", "")
+		workoutexerciseListOffsetFlag = workoutexerciseListFlags.String("offset", "", "")
+
+		workoutexerciseUpdateFlags    = flag.NewFlagSet("update", flag.ExitOnError)
+		workoutexerciseUpdateBodyFlag = workoutexerciseUpdateFlags.String("body", "REQUIRED", "")
+		workoutexerciseUpdateIDFlag   = workoutexerciseUpdateFlags.String("id", "REQUIRED", "Workout Exercise ID")
+
+		workoutexerciseDeleteFlags  = flag.NewFlagSet("delete", flag.ExitOnError)
+		workoutexerciseDeleteIDFlag = workoutexerciseDeleteFlags.String("id", "REQUIRED", "Workout Exercise ID")
+
+		workoutprogressFlags = flag.NewFlagSet("workoutprogress", flag.ContinueOnError)
+
+		workoutprogressCreateFlags    = flag.NewFlagSet("create", flag.ExitOnError)
+		workoutprogressCreateBodyFlag = workoutprogressCreateFlags.String("body", "REQUIRED", "")
+
+		workoutprogressGetFlags  = flag.NewFlagSet("get", flag.ExitOnError)
+		workoutprogressGetIDFlag = workoutprogressGetFlags.String("id", "REQUIRED", "Workout Progress ID")
+
+		workoutprogressListFlags      = flag.NewFlagSet("list", flag.ExitOnError)
+		workoutprogressListLimitFlag  = workoutprogressListFlags.String("limit", "10", "")
+		workoutprogressListOffsetFlag = workoutprogressListFlags.String("offset", "", "")
+
+		workoutprogressUpdateFlags    = flag.NewFlagSet("update", flag.ExitOnError)
+		workoutprogressUpdateBodyFlag = workoutprogressUpdateFlags.String("body", "REQUIRED", "")
+		workoutprogressUpdateIDFlag   = workoutprogressUpdateFlags.String("id", "REQUIRED", "Workout Progress ID")
+
+		workoutprogressDeleteFlags  = flag.NewFlagSet("delete", flag.ExitOnError)
+		workoutprogressDeleteIDFlag = workoutprogressDeleteFlags.String("id", "REQUIRED", "Workout Progress ID")
+
+		workoutFlags = flag.NewFlagSet("workout", flag.ContinueOnError)
+
+		workoutCreateFlags    = flag.NewFlagSet("create", flag.ExitOnError)
+		workoutCreateBodyFlag = workoutCreateFlags.String("body", "REQUIRED", "")
+
+		workoutGetFlags  = flag.NewFlagSet("get", flag.ExitOnError)
+		workoutGetIDFlag = workoutGetFlags.String("id", "REQUIRED", "Workout ID")
+
+		workoutListFlags      = flag.NewFlagSet("list", flag.ExitOnError)
+		workoutListLimitFlag  = workoutListFlags.String("limit", "10", "")
+		workoutListOffsetFlag = workoutListFlags.String("offset", "", "")
+
+		workoutUpdateFlags    = flag.NewFlagSet("update", flag.ExitOnError)
+		workoutUpdateBodyFlag = workoutUpdateFlags.String("body", "REQUIRED", "")
+		workoutUpdateIDFlag   = workoutUpdateFlags.String("id", "REQUIRED", "Workout ID")
+
+		workoutDeleteFlags  = flag.NewFlagSet("delete", flag.ExitOnError)
+		workoutDeleteIDFlag = workoutDeleteFlags.String("id", "REQUIRED", "Workout ID")
+
+		workouttypeFlags = flag.NewFlagSet("workouttype", flag.ContinueOnError)
+
+		workouttypeCreateFlags    = flag.NewFlagSet("create", flag.ExitOnError)
+		workouttypeCreateBodyFlag = workouttypeCreateFlags.String("body", "REQUIRED", "")
+
+		workouttypeGetFlags  = flag.NewFlagSet("get", flag.ExitOnError)
+		workouttypeGetIDFlag = workouttypeGetFlags.String("id", "REQUIRED", "Workout Type ID")
+
+		workouttypeListFlags      = flag.NewFlagSet("list", flag.ExitOnError)
+		workouttypeListLimitFlag  = workouttypeListFlags.String("limit", "10", "")
+		workouttypeListOffsetFlag = workouttypeListFlags.String("offset", "", "")
+
+		workouttypeUpdateFlags    = flag.NewFlagSet("update", flag.ExitOnError)
+		workouttypeUpdateBodyFlag = workouttypeUpdateFlags.String("body", "REQUIRED", "")
+		workouttypeUpdateIDFlag   = workouttypeUpdateFlags.String("id", "REQUIRED", "Workout Type ID")
+
+		workouttypeDeleteFlags  = flag.NewFlagSet("delete", flag.ExitOnError)
+		workouttypeDeleteIDFlag = workouttypeDeleteFlags.String("id", "REQUIRED", "Workout Type ID")
 	)
+	exerciseprogressFlags.Usage = exerciseprogressUsage
+	exerciseprogressCreateFlags.Usage = exerciseprogressCreateUsage
+	exerciseprogressGetFlags.Usage = exerciseprogressGetUsage
+	exerciseprogressListFlags.Usage = exerciseprogressListUsage
+	exerciseprogressUpdateFlags.Usage = exerciseprogressUpdateUsage
+	exerciseprogressDeleteFlags.Usage = exerciseprogressDeleteUsage
+
+	exerciseFlags.Usage = exerciseUsage
+	exerciseCreateFlags.Usage = exerciseCreateUsage
+	exerciseGetFlags.Usage = exerciseGetUsage
+	exerciseListFlags.Usage = exerciseListUsage
+	exerciseUpdateFlags.Usage = exerciseUpdateUsage
+	exerciseDeleteFlags.Usage = exerciseDeleteUsage
+
+	musclegroupFlags.Usage = musclegroupUsage
+	musclegroupCreateFlags.Usage = musclegroupCreateUsage
+	musclegroupGetFlags.Usage = musclegroupGetUsage
+	musclegroupListFlags.Usage = musclegroupListUsage
+	musclegroupUpdateFlags.Usage = musclegroupUpdateUsage
+	musclegroupDeleteFlags.Usage = musclegroupDeleteUsage
+
+	trainingplanFlags.Usage = trainingplanUsage
+	trainingplanCreateFlags.Usage = trainingplanCreateUsage
+	trainingplanGetFlags.Usage = trainingplanGetUsage
+	trainingplanListFlags.Usage = trainingplanListUsage
+	trainingplanUpdateFlags.Usage = trainingplanUpdateUsage
+	trainingplanDeleteFlags.Usage = trainingplanDeleteUsage
+
 	userFlags.Usage = userUsage
 	userCreateFlags.Usage = userCreateUsage
 	userGetFlags.Usage = userGetUsage
 	userListFlags.Usage = userListUsage
 	userUpdateFlags.Usage = userUpdateUsage
 	userDeleteFlags.Usage = userDeleteUsage
+
+	workoutexerciseFlags.Usage = workoutexerciseUsage
+	workoutexerciseCreateFlags.Usage = workoutexerciseCreateUsage
+	workoutexerciseGetFlags.Usage = workoutexerciseGetUsage
+	workoutexerciseListFlags.Usage = workoutexerciseListUsage
+	workoutexerciseUpdateFlags.Usage = workoutexerciseUpdateUsage
+	workoutexerciseDeleteFlags.Usage = workoutexerciseDeleteUsage
+
+	workoutprogressFlags.Usage = workoutprogressUsage
+	workoutprogressCreateFlags.Usage = workoutprogressCreateUsage
+	workoutprogressGetFlags.Usage = workoutprogressGetUsage
+	workoutprogressListFlags.Usage = workoutprogressListUsage
+	workoutprogressUpdateFlags.Usage = workoutprogressUpdateUsage
+	workoutprogressDeleteFlags.Usage = workoutprogressDeleteUsage
+
+	workoutFlags.Usage = workoutUsage
+	workoutCreateFlags.Usage = workoutCreateUsage
+	workoutGetFlags.Usage = workoutGetUsage
+	workoutListFlags.Usage = workoutListUsage
+	workoutUpdateFlags.Usage = workoutUpdateUsage
+	workoutDeleteFlags.Usage = workoutDeleteUsage
+
+	workouttypeFlags.Usage = workouttypeUsage
+	workouttypeCreateFlags.Usage = workouttypeCreateUsage
+	workouttypeGetFlags.Usage = workouttypeGetUsage
+	workouttypeListFlags.Usage = workouttypeListUsage
+	workouttypeUpdateFlags.Usage = workouttypeUpdateUsage
+	workouttypeDeleteFlags.Usage = workouttypeDeleteUsage
 
 	if err := flag.CommandLine.Parse(os.Args[1:]); err != nil {
 		return nil, nil, err
@@ -89,8 +337,24 @@ func ParseEndpoint(
 	{
 		svcn = flag.Arg(0)
 		switch svcn {
+		case "exerciseprogress":
+			svcf = exerciseprogressFlags
+		case "exercise":
+			svcf = exerciseFlags
+		case "musclegroup":
+			svcf = musclegroupFlags
+		case "trainingplan":
+			svcf = trainingplanFlags
 		case "user":
 			svcf = userFlags
+		case "workoutexercise":
+			svcf = workoutexerciseFlags
+		case "workoutprogress":
+			svcf = workoutprogressFlags
+		case "workout":
+			svcf = workoutFlags
+		case "workouttype":
+			svcf = workouttypeFlags
 		default:
 			return nil, nil, fmt.Errorf("unknown service %q", svcn)
 		}
@@ -106,6 +370,82 @@ func ParseEndpoint(
 	{
 		epn = svcf.Arg(0)
 		switch svcn {
+		case "exerciseprogress":
+			switch epn {
+			case "create":
+				epf = exerciseprogressCreateFlags
+
+			case "get":
+				epf = exerciseprogressGetFlags
+
+			case "list":
+				epf = exerciseprogressListFlags
+
+			case "update":
+				epf = exerciseprogressUpdateFlags
+
+			case "delete":
+				epf = exerciseprogressDeleteFlags
+
+			}
+
+		case "exercise":
+			switch epn {
+			case "create":
+				epf = exerciseCreateFlags
+
+			case "get":
+				epf = exerciseGetFlags
+
+			case "list":
+				epf = exerciseListFlags
+
+			case "update":
+				epf = exerciseUpdateFlags
+
+			case "delete":
+				epf = exerciseDeleteFlags
+
+			}
+
+		case "musclegroup":
+			switch epn {
+			case "create":
+				epf = musclegroupCreateFlags
+
+			case "get":
+				epf = musclegroupGetFlags
+
+			case "list":
+				epf = musclegroupListFlags
+
+			case "update":
+				epf = musclegroupUpdateFlags
+
+			case "delete":
+				epf = musclegroupDeleteFlags
+
+			}
+
+		case "trainingplan":
+			switch epn {
+			case "create":
+				epf = trainingplanCreateFlags
+
+			case "get":
+				epf = trainingplanGetFlags
+
+			case "list":
+				epf = trainingplanListFlags
+
+			case "update":
+				epf = trainingplanUpdateFlags
+
+			case "delete":
+				epf = trainingplanDeleteFlags
+
+			}
+
 		case "user":
 			switch epn {
 			case "create":
@@ -122,6 +462,82 @@ func ParseEndpoint(
 
 			case "delete":
 				epf = userDeleteFlags
+
+			}
+
+		case "workoutexercise":
+			switch epn {
+			case "create":
+				epf = workoutexerciseCreateFlags
+
+			case "get":
+				epf = workoutexerciseGetFlags
+
+			case "list":
+				epf = workoutexerciseListFlags
+
+			case "update":
+				epf = workoutexerciseUpdateFlags
+
+			case "delete":
+				epf = workoutexerciseDeleteFlags
+
+			}
+
+		case "workoutprogress":
+			switch epn {
+			case "create":
+				epf = workoutprogressCreateFlags
+
+			case "get":
+				epf = workoutprogressGetFlags
+
+			case "list":
+				epf = workoutprogressListFlags
+
+			case "update":
+				epf = workoutprogressUpdateFlags
+
+			case "delete":
+				epf = workoutprogressDeleteFlags
+
+			}
+
+		case "workout":
+			switch epn {
+			case "create":
+				epf = workoutCreateFlags
+
+			case "get":
+				epf = workoutGetFlags
+
+			case "list":
+				epf = workoutListFlags
+
+			case "update":
+				epf = workoutUpdateFlags
+
+			case "delete":
+				epf = workoutDeleteFlags
+
+			}
+
+		case "workouttype":
+			switch epn {
+			case "create":
+				epf = workouttypeCreateFlags
+
+			case "get":
+				epf = workouttypeGetFlags
+
+			case "list":
+				epf = workouttypeListFlags
+
+			case "update":
+				epf = workouttypeUpdateFlags
+
+			case "delete":
+				epf = workouttypeDeleteFlags
 
 			}
 
@@ -145,6 +561,82 @@ func ParseEndpoint(
 	)
 	{
 		switch svcn {
+		case "exerciseprogress":
+			c := exerciseprogressc.NewClient(scheme, host, doer, enc, dec, restore)
+			switch epn {
+			case "create":
+				endpoint = c.Create()
+				data, err = exerciseprogressc.BuildCreatePayload(*exerciseprogressCreateBodyFlag)
+			case "get":
+				endpoint = c.Get()
+				data, err = exerciseprogressc.BuildGetPayload(*exerciseprogressGetIDFlag)
+			case "list":
+				endpoint = c.List()
+				data, err = exerciseprogressc.BuildListPayload(*exerciseprogressListLimitFlag, *exerciseprogressListOffsetFlag)
+			case "update":
+				endpoint = c.Update()
+				data, err = exerciseprogressc.BuildUpdatePayload(*exerciseprogressUpdateBodyFlag, *exerciseprogressUpdateIDFlag)
+			case "delete":
+				endpoint = c.Delete()
+				data, err = exerciseprogressc.BuildDeletePayload(*exerciseprogressDeleteIDFlag)
+			}
+		case "exercise":
+			c := exercisec.NewClient(scheme, host, doer, enc, dec, restore)
+			switch epn {
+			case "create":
+				endpoint = c.Create()
+				data, err = exercisec.BuildCreatePayload(*exerciseCreateBodyFlag)
+			case "get":
+				endpoint = c.Get()
+				data, err = exercisec.BuildGetPayload(*exerciseGetIDFlag)
+			case "list":
+				endpoint = c.List()
+				data, err = exercisec.BuildListPayload(*exerciseListLimitFlag, *exerciseListOffsetFlag)
+			case "update":
+				endpoint = c.Update()
+				data, err = exercisec.BuildUpdatePayload(*exerciseUpdateBodyFlag, *exerciseUpdateIDFlag)
+			case "delete":
+				endpoint = c.Delete()
+				data, err = exercisec.BuildDeletePayload(*exerciseDeleteIDFlag)
+			}
+		case "musclegroup":
+			c := musclegroupc.NewClient(scheme, host, doer, enc, dec, restore)
+			switch epn {
+			case "create":
+				endpoint = c.Create()
+				data, err = musclegroupc.BuildCreatePayload(*musclegroupCreateBodyFlag)
+			case "get":
+				endpoint = c.Get()
+				data, err = musclegroupc.BuildGetPayload(*musclegroupGetIDFlag)
+			case "list":
+				endpoint = c.List()
+				data, err = musclegroupc.BuildListPayload(*musclegroupListLimitFlag, *musclegroupListOffsetFlag)
+			case "update":
+				endpoint = c.Update()
+				data, err = musclegroupc.BuildUpdatePayload(*musclegroupUpdateBodyFlag, *musclegroupUpdateIDFlag)
+			case "delete":
+				endpoint = c.Delete()
+				data, err = musclegroupc.BuildDeletePayload(*musclegroupDeleteIDFlag)
+			}
+		case "trainingplan":
+			c := trainingplanc.NewClient(scheme, host, doer, enc, dec, restore)
+			switch epn {
+			case "create":
+				endpoint = c.Create()
+				data, err = trainingplanc.BuildCreatePayload(*trainingplanCreateBodyFlag)
+			case "get":
+				endpoint = c.Get()
+				data, err = trainingplanc.BuildGetPayload(*trainingplanGetIDFlag)
+			case "list":
+				endpoint = c.List()
+				data, err = trainingplanc.BuildListPayload(*trainingplanListLimitFlag, *trainingplanListOffsetFlag)
+			case "update":
+				endpoint = c.Update()
+				data, err = trainingplanc.BuildUpdatePayload(*trainingplanUpdateBodyFlag, *trainingplanUpdateIDFlag)
+			case "delete":
+				endpoint = c.Delete()
+				data, err = trainingplanc.BuildDeletePayload(*trainingplanDeleteIDFlag)
+			}
 		case "user":
 			c := userc.NewClient(scheme, host, doer, enc, dec, restore)
 			switch epn {
@@ -164,6 +656,82 @@ func ParseEndpoint(
 				endpoint = c.Delete()
 				data, err = userc.BuildDeletePayload(*userDeleteIDFlag)
 			}
+		case "workoutexercise":
+			c := workoutexercisec.NewClient(scheme, host, doer, enc, dec, restore)
+			switch epn {
+			case "create":
+				endpoint = c.Create()
+				data, err = workoutexercisec.BuildCreatePayload(*workoutexerciseCreateBodyFlag)
+			case "get":
+				endpoint = c.Get()
+				data, err = workoutexercisec.BuildGetPayload(*workoutexerciseGetIDFlag)
+			case "list":
+				endpoint = c.List()
+				data, err = workoutexercisec.BuildListPayload(*workoutexerciseListLimitFlag, *workoutexerciseListOffsetFlag)
+			case "update":
+				endpoint = c.Update()
+				data, err = workoutexercisec.BuildUpdatePayload(*workoutexerciseUpdateBodyFlag, *workoutexerciseUpdateIDFlag)
+			case "delete":
+				endpoint = c.Delete()
+				data, err = workoutexercisec.BuildDeletePayload(*workoutexerciseDeleteIDFlag)
+			}
+		case "workoutprogress":
+			c := workoutprogressc.NewClient(scheme, host, doer, enc, dec, restore)
+			switch epn {
+			case "create":
+				endpoint = c.Create()
+				data, err = workoutprogressc.BuildCreatePayload(*workoutprogressCreateBodyFlag)
+			case "get":
+				endpoint = c.Get()
+				data, err = workoutprogressc.BuildGetPayload(*workoutprogressGetIDFlag)
+			case "list":
+				endpoint = c.List()
+				data, err = workoutprogressc.BuildListPayload(*workoutprogressListLimitFlag, *workoutprogressListOffsetFlag)
+			case "update":
+				endpoint = c.Update()
+				data, err = workoutprogressc.BuildUpdatePayload(*workoutprogressUpdateBodyFlag, *workoutprogressUpdateIDFlag)
+			case "delete":
+				endpoint = c.Delete()
+				data, err = workoutprogressc.BuildDeletePayload(*workoutprogressDeleteIDFlag)
+			}
+		case "workout":
+			c := workoutc.NewClient(scheme, host, doer, enc, dec, restore)
+			switch epn {
+			case "create":
+				endpoint = c.Create()
+				data, err = workoutc.BuildCreatePayload(*workoutCreateBodyFlag)
+			case "get":
+				endpoint = c.Get()
+				data, err = workoutc.BuildGetPayload(*workoutGetIDFlag)
+			case "list":
+				endpoint = c.List()
+				data, err = workoutc.BuildListPayload(*workoutListLimitFlag, *workoutListOffsetFlag)
+			case "update":
+				endpoint = c.Update()
+				data, err = workoutc.BuildUpdatePayload(*workoutUpdateBodyFlag, *workoutUpdateIDFlag)
+			case "delete":
+				endpoint = c.Delete()
+				data, err = workoutc.BuildDeletePayload(*workoutDeleteIDFlag)
+			}
+		case "workouttype":
+			c := workouttypec.NewClient(scheme, host, doer, enc, dec, restore)
+			switch epn {
+			case "create":
+				endpoint = c.Create()
+				data, err = workouttypec.BuildCreatePayload(*workouttypeCreateBodyFlag)
+			case "get":
+				endpoint = c.Get()
+				data, err = workouttypec.BuildGetPayload(*workouttypeGetIDFlag)
+			case "list":
+				endpoint = c.List()
+				data, err = workouttypec.BuildListPayload(*workouttypeListLimitFlag, *workouttypeListOffsetFlag)
+			case "update":
+				endpoint = c.Update()
+				data, err = workouttypec.BuildUpdatePayload(*workouttypeUpdateBodyFlag, *workouttypeUpdateIDFlag)
+			case "delete":
+				endpoint = c.Delete()
+				data, err = workouttypec.BuildDeletePayload(*workouttypeDeleteIDFlag)
+			}
 		}
 	}
 	if err != nil {
@@ -171,6 +739,343 @@ func ParseEndpoint(
 	}
 
 	return endpoint, data, nil
+}
+
+// exerciseprogressUsage displays the usage of the exerciseprogress command and
+// its subcommands.
+func exerciseprogressUsage() {
+	fmt.Fprintf(os.Stderr, `Service for managing exercise progress
+Usage:
+    %[1]s [globalflags] exerciseprogress COMMAND [flags]
+
+COMMAND:
+    create: Create a new exercise progress record
+    get: Get an exercise progress record by ID
+    list: List all exercise progress records with pagination
+    update: Update an exercise progress record
+    delete: Delete an exercise progress record
+
+Additional help:
+    %[1]s exerciseprogress COMMAND --help
+`, os.Args[0])
+}
+func exerciseprogressCreateUsage() {
+	fmt.Fprintf(os.Stderr, `%[1]s [flags] exerciseprogress create -body JSON
+
+Create a new exercise progress record
+    -body JSON: 
+
+Example:
+    %[1]s exerciseprogress create --body '{
+      "actualDuration": 60,
+      "actualRepetitions": 10,
+      "actualWeight": 50,
+      "notes": "Felt strong",
+      "workoutExerciseId": "f47ac10b-58cc-4372-a567-0e02b2c3d485",
+      "workoutProgressId": "f47ac10b-58cc-4372-a567-0e02b2c3d486"
+   }'
+`, os.Args[0])
+}
+
+func exerciseprogressGetUsage() {
+	fmt.Fprintf(os.Stderr, `%[1]s [flags] exerciseprogress get -id STRING
+
+Get an exercise progress record by ID
+    -id STRING: Exercise Progress ID
+
+Example:
+    %[1]s exerciseprogress get --id "f47ac10b-58cc-4372-a567-0e02b2c3d487"
+`, os.Args[0])
+}
+
+func exerciseprogressListUsage() {
+	fmt.Fprintf(os.Stderr, `%[1]s [flags] exerciseprogress list -limit INT -offset INT
+
+List all exercise progress records with pagination
+    -limit INT: 
+    -offset INT: 
+
+Example:
+    %[1]s exerciseprogress list --limit 10 --offset 0
+`, os.Args[0])
+}
+
+func exerciseprogressUpdateUsage() {
+	fmt.Fprintf(os.Stderr, `%[1]s [flags] exerciseprogress update -body JSON -id STRING
+
+Update an exercise progress record
+    -body JSON: 
+    -id STRING: Exercise Progress ID
+
+Example:
+    %[1]s exerciseprogress update --body '{
+      "actualDuration": 60,
+      "actualRepetitions": 10,
+      "actualWeight": 50,
+      "notes": "Felt strong"
+   }' --id "f47ac10b-58cc-4372-a567-0e02b2c3d487"
+`, os.Args[0])
+}
+
+func exerciseprogressDeleteUsage() {
+	fmt.Fprintf(os.Stderr, `%[1]s [flags] exerciseprogress delete -id STRING
+
+Delete an exercise progress record
+    -id STRING: Exercise Progress ID
+
+Example:
+    %[1]s exerciseprogress delete --id "f47ac10b-58cc-4372-a567-0e02b2c3d487"
+`, os.Args[0])
+}
+
+// exerciseUsage displays the usage of the exercise command and its subcommands.
+func exerciseUsage() {
+	fmt.Fprintf(os.Stderr, `Service for managing exercises
+Usage:
+    %[1]s [globalflags] exercise COMMAND [flags]
+
+COMMAND:
+    create: Create a new exercise
+    get: Get an exercise by ID
+    list: List all exercises with pagination
+    update: Update an exercise
+    delete: Delete an exercise
+
+Additional help:
+    %[1]s exercise COMMAND --help
+`, os.Args[0])
+}
+func exerciseCreateUsage() {
+	fmt.Fprintf(os.Stderr, `%[1]s [flags] exercise create -body JSON
+
+Create a new exercise
+    -body JSON: 
+
+Example:
+    %[1]s exercise create --body '{
+      "muscleGroupId": "f47ac10b-58cc-4372-a567-0e02b2c3d483",
+      "name": "Push Up"
+   }'
+`, os.Args[0])
+}
+
+func exerciseGetUsage() {
+	fmt.Fprintf(os.Stderr, `%[1]s [flags] exercise get -id STRING
+
+Get an exercise by ID
+    -id STRING: Exercise ID
+
+Example:
+    %[1]s exercise get --id "f47ac10b-58cc-4372-a567-0e02b2c3d484"
+`, os.Args[0])
+}
+
+func exerciseListUsage() {
+	fmt.Fprintf(os.Stderr, `%[1]s [flags] exercise list -limit INT -offset INT
+
+List all exercises with pagination
+    -limit INT: 
+    -offset INT: 
+
+Example:
+    %[1]s exercise list --limit 10 --offset 0
+`, os.Args[0])
+}
+
+func exerciseUpdateUsage() {
+	fmt.Fprintf(os.Stderr, `%[1]s [flags] exercise update -body JSON -id STRING
+
+Update an exercise
+    -body JSON: 
+    -id STRING: Exercise ID
+
+Example:
+    %[1]s exercise update --body '{
+      "muscleGroupId": "f47ac10b-58cc-4372-a567-0e02b2c3d483",
+      "name": "Push Up Updated"
+   }' --id "f47ac10b-58cc-4372-a567-0e02b2c3d484"
+`, os.Args[0])
+}
+
+func exerciseDeleteUsage() {
+	fmt.Fprintf(os.Stderr, `%[1]s [flags] exercise delete -id STRING
+
+Delete an exercise
+    -id STRING: Exercise ID
+
+Example:
+    %[1]s exercise delete --id "f47ac10b-58cc-4372-a567-0e02b2c3d484"
+`, os.Args[0])
+}
+
+// musclegroupUsage displays the usage of the musclegroup command and its
+// subcommands.
+func musclegroupUsage() {
+	fmt.Fprintf(os.Stderr, `Service for managing muscle groups
+Usage:
+    %[1]s [globalflags] musclegroup COMMAND [flags]
+
+COMMAND:
+    create: Create a new muscle group
+    get: Get a muscle group by ID
+    list: List all muscle groups with pagination
+    update: Update a muscle group
+    delete: Delete a muscle group
+
+Additional help:
+    %[1]s musclegroup COMMAND --help
+`, os.Args[0])
+}
+func musclegroupCreateUsage() {
+	fmt.Fprintf(os.Stderr, `%[1]s [flags] musclegroup create -body JSON
+
+Create a new muscle group
+    -body JSON: 
+
+Example:
+    %[1]s musclegroup create --body '{
+      "description": "Group for chest exercises",
+      "name": "Chest"
+   }'
+`, os.Args[0])
+}
+
+func musclegroupGetUsage() {
+	fmt.Fprintf(os.Stderr, `%[1]s [flags] musclegroup get -id STRING
+
+Get a muscle group by ID
+    -id STRING: Muscle Group ID
+
+Example:
+    %[1]s musclegroup get --id "f47ac10b-58cc-4372-a567-0e02b2c3d483"
+`, os.Args[0])
+}
+
+func musclegroupListUsage() {
+	fmt.Fprintf(os.Stderr, `%[1]s [flags] musclegroup list -limit INT -offset INT
+
+List all muscle groups with pagination
+    -limit INT: 
+    -offset INT: 
+
+Example:
+    %[1]s musclegroup list --limit 10 --offset 0
+`, os.Args[0])
+}
+
+func musclegroupUpdateUsage() {
+	fmt.Fprintf(os.Stderr, `%[1]s [flags] musclegroup update -body JSON -id STRING
+
+Update a muscle group
+    -body JSON: 
+    -id STRING: Muscle Group ID
+
+Example:
+    %[1]s musclegroup update --body '{
+      "description": "Updated description",
+      "name": "Chest Updated"
+   }' --id "f47ac10b-58cc-4372-a567-0e02b2c3d483"
+`, os.Args[0])
+}
+
+func musclegroupDeleteUsage() {
+	fmt.Fprintf(os.Stderr, `%[1]s [flags] musclegroup delete -id STRING
+
+Delete a muscle group
+    -id STRING: Muscle Group ID
+
+Example:
+    %[1]s musclegroup delete --id "f47ac10b-58cc-4372-a567-0e02b2c3d483"
+`, os.Args[0])
+}
+
+// trainingplanUsage displays the usage of the trainingplan command and its
+// subcommands.
+func trainingplanUsage() {
+	fmt.Fprintf(os.Stderr, `Service for managing training plans
+Usage:
+    %[1]s [globalflags] trainingplan COMMAND [flags]
+
+COMMAND:
+    create: Create a new training plan
+    get: Get a training plan by ID
+    list: List all training plans with pagination
+    update: Update a training plan
+    delete: Delete a training plan
+
+Additional help:
+    %[1]s trainingplan COMMAND --help
+`, os.Args[0])
+}
+func trainingplanCreateUsage() {
+	fmt.Fprintf(os.Stderr, `%[1]s [flags] trainingplan create -body JSON
+
+Create a new training plan
+    -body JSON: 
+
+Example:
+    %[1]s trainingplan create --body '{
+      "description": "Descrizione del piano di allenamento",
+      "endDate": "2025-02-28T00:00:00Z",
+      "name": "Piano di Allenamento",
+      "startDate": "2025-02-01T00:00:00Z",
+      "userId": "f47ac10b-58cc-4372-a567-0e02b2c3d479",
+      "workoutTypeId": "f47ac10b-58cc-4372-a567-0e02b2c3d480"
+   }'
+`, os.Args[0])
+}
+
+func trainingplanGetUsage() {
+	fmt.Fprintf(os.Stderr, `%[1]s [flags] trainingplan get -id STRING
+
+Get a training plan by ID
+    -id STRING: Training plan ID
+
+Example:
+    %[1]s trainingplan get --id "f47ac10b-58cc-4372-a567-0e02b2c3d479"
+`, os.Args[0])
+}
+
+func trainingplanListUsage() {
+	fmt.Fprintf(os.Stderr, `%[1]s [flags] trainingplan list -limit INT -offset INT
+
+List all training plans with pagination
+    -limit INT: 
+    -offset INT: 
+
+Example:
+    %[1]s trainingplan list --limit 10 --offset 0
+`, os.Args[0])
+}
+
+func trainingplanUpdateUsage() {
+	fmt.Fprintf(os.Stderr, `%[1]s [flags] trainingplan update -body JSON -id STRING
+
+Update a training plan
+    -body JSON: 
+    -id STRING: Unique ID of the training plan
+
+Example:
+    %[1]s trainingplan update --body '{
+      "description": "Descrizione aggiornata del piano",
+      "endDate": "2025-02-28T00:00:00Z",
+      "name": "Piano di Allenamento Updated",
+      "startDate": "2025-02-01T00:00:00Z",
+      "userId": "f47ac10b-58cc-4372-a567-0e02b2c3d479",
+      "workoutTypeId": "f47ac10b-58cc-4372-a567-0e02b2c3d480"
+   }' --id "f47ac10b-58cc-4372-a567-0e02b2c3d479"
+`, os.Args[0])
+}
+
+func trainingplanDeleteUsage() {
+	fmt.Fprintf(os.Stderr, `%[1]s [flags] trainingplan delete -id STRING
+
+Delete a training plan
+    -id STRING: Training plan ID
+
+Example:
+    %[1]s trainingplan delete --id "f47ac10b-58cc-4372-a567-0e02b2c3d479"
+`, os.Args[0])
 }
 
 // userUsage displays the usage of the user command and its subcommands.
@@ -256,5 +1161,334 @@ Delete a user
 
 Example:
     %[1]s user delete --id "f47ac10b-58cc-4372-a567-0e02b2c3d479"
+`, os.Args[0])
+}
+
+// workoutexerciseUsage displays the usage of the workoutexercise command and
+// its subcommands.
+func workoutexerciseUsage() {
+	fmt.Fprintf(os.Stderr, `Service for managing workout exercise configuration
+Usage:
+    %[1]s [globalflags] workoutexercise COMMAND [flags]
+
+COMMAND:
+    create: Create a new workout exercise configuration
+    get: Get a workout exercise configuration by ID
+    list: List all workout exercise configurations with pagination
+    update: Update a workout exercise configuration
+    delete: Delete a workout exercise configuration
+
+Additional help:
+    %[1]s workoutexercise COMMAND --help
+`, os.Args[0])
+}
+func workoutexerciseCreateUsage() {
+	fmt.Fprintf(os.Stderr, `%[1]s [flags] workoutexercise create -body JSON
+
+Create a new workout exercise configuration
+    -body JSON: 
+
+Example:
+    %[1]s workoutexercise create --body '{
+      "duration": 60,
+      "exerciseId": "f47ac10b-58cc-4372-a567-0e02b2c3d484",
+      "notes": "Focus on form",
+      "repetitions": 12,
+      "sets": 3,
+      "workoutId": "f47ac10b-58cc-4372-a567-0e02b2c3d481"
+   }'
+`, os.Args[0])
+}
+
+func workoutexerciseGetUsage() {
+	fmt.Fprintf(os.Stderr, `%[1]s [flags] workoutexercise get -id STRING
+
+Get a workout exercise configuration by ID
+    -id STRING: Workout Exercise ID
+
+Example:
+    %[1]s workoutexercise get --id "f47ac10b-58cc-4372-a567-0e02b2c3d485"
+`, os.Args[0])
+}
+
+func workoutexerciseListUsage() {
+	fmt.Fprintf(os.Stderr, `%[1]s [flags] workoutexercise list -limit INT -offset INT
+
+List all workout exercise configurations with pagination
+    -limit INT: 
+    -offset INT: 
+
+Example:
+    %[1]s workoutexercise list --limit 10 --offset 0
+`, os.Args[0])
+}
+
+func workoutexerciseUpdateUsage() {
+	fmt.Fprintf(os.Stderr, `%[1]s [flags] workoutexercise update -body JSON -id STRING
+
+Update a workout exercise configuration
+    -body JSON: 
+    -id STRING: Workout Exercise ID
+
+Example:
+    %[1]s workoutexercise update --body '{
+      "duration": 60,
+      "notes": "Focus on form",
+      "repetitions": 12,
+      "sets": 3
+   }' --id "f47ac10b-58cc-4372-a567-0e02b2c3d485"
+`, os.Args[0])
+}
+
+func workoutexerciseDeleteUsage() {
+	fmt.Fprintf(os.Stderr, `%[1]s [flags] workoutexercise delete -id STRING
+
+Delete a workout exercise configuration
+    -id STRING: Workout Exercise ID
+
+Example:
+    %[1]s workoutexercise delete --id "f47ac10b-58cc-4372-a567-0e02b2c3d485"
+`, os.Args[0])
+}
+
+// workoutprogressUsage displays the usage of the workoutprogress command and
+// its subcommands.
+func workoutprogressUsage() {
+	fmt.Fprintf(os.Stderr, `Service for managing workout progress
+Usage:
+    %[1]s [globalflags] workoutprogress COMMAND [flags]
+
+COMMAND:
+    create: Create a new workout progress record
+    get: Get a workout progress record by ID
+    list: List all workout progress records with pagination
+    update: Update a workout progress record
+    delete: Delete a workout progress record
+
+Additional help:
+    %[1]s workoutprogress COMMAND --help
+`, os.Args[0])
+}
+func workoutprogressCreateUsage() {
+	fmt.Fprintf(os.Stderr, `%[1]s [flags] workoutprogress create -body JSON
+
+Create a new workout progress record
+    -body JSON: 
+
+Example:
+    %[1]s workoutprogress create --body '{
+      "date": "2025-02-15T10:00:00Z",
+      "userId": "f47ac10b-58cc-4372-a567-0e02b2c3d479",
+      "workoutId": "f47ac10b-58cc-4372-a567-0e02b2c3d481"
+   }'
+`, os.Args[0])
+}
+
+func workoutprogressGetUsage() {
+	fmt.Fprintf(os.Stderr, `%[1]s [flags] workoutprogress get -id STRING
+
+Get a workout progress record by ID
+    -id STRING: Workout Progress ID
+
+Example:
+    %[1]s workoutprogress get --id "f47ac10b-58cc-4372-a567-0e02b2c3d486"
+`, os.Args[0])
+}
+
+func workoutprogressListUsage() {
+	fmt.Fprintf(os.Stderr, `%[1]s [flags] workoutprogress list -limit INT -offset INT
+
+List all workout progress records with pagination
+    -limit INT: 
+    -offset INT: 
+
+Example:
+    %[1]s workoutprogress list --limit 10 --offset 0
+`, os.Args[0])
+}
+
+func workoutprogressUpdateUsage() {
+	fmt.Fprintf(os.Stderr, `%[1]s [flags] workoutprogress update -body JSON -id STRING
+
+Update a workout progress record
+    -body JSON: 
+    -id STRING: Workout Progress ID
+
+Example:
+    %[1]s workoutprogress update --body '{
+      "date": "2025-02-15T10:00:00Z"
+   }' --id "f47ac10b-58cc-4372-a567-0e02b2c3d486"
+`, os.Args[0])
+}
+
+func workoutprogressDeleteUsage() {
+	fmt.Fprintf(os.Stderr, `%[1]s [flags] workoutprogress delete -id STRING
+
+Delete a workout progress record
+    -id STRING: Workout Progress ID
+
+Example:
+    %[1]s workoutprogress delete --id "f47ac10b-58cc-4372-a567-0e02b2c3d486"
+`, os.Args[0])
+}
+
+// workoutUsage displays the usage of the workout command and its subcommands.
+func workoutUsage() {
+	fmt.Fprintf(os.Stderr, `Service for managing workouts
+Usage:
+    %[1]s [globalflags] workout COMMAND [flags]
+
+COMMAND:
+    create: Create a new workout
+    get: Get a workout by ID
+    list: List all workouts with pagination
+    update: Update a workout
+    delete: Delete a workout
+
+Additional help:
+    %[1]s workout COMMAND --help
+`, os.Args[0])
+}
+func workoutCreateUsage() {
+	fmt.Fprintf(os.Stderr, `%[1]s [flags] workout create -body JSON
+
+Create a new workout
+    -body JSON: 
+
+Example:
+    %[1]s workout create --body '{
+      "name": "Workout A",
+      "trainingPlanId": "f47ac10b-58cc-4372-a567-0e02b2c3d479"
+   }'
+`, os.Args[0])
+}
+
+func workoutGetUsage() {
+	fmt.Fprintf(os.Stderr, `%[1]s [flags] workout get -id STRING
+
+Get a workout by ID
+    -id STRING: Workout ID
+
+Example:
+    %[1]s workout get --id "f47ac10b-58cc-4372-a567-0e02b2c3d481"
+`, os.Args[0])
+}
+
+func workoutListUsage() {
+	fmt.Fprintf(os.Stderr, `%[1]s [flags] workout list -limit INT -offset INT
+
+List all workouts with pagination
+    -limit INT: 
+    -offset INT: 
+
+Example:
+    %[1]s workout list --limit 10 --offset 0
+`, os.Args[0])
+}
+
+func workoutUpdateUsage() {
+	fmt.Fprintf(os.Stderr, `%[1]s [flags] workout update -body JSON -id STRING
+
+Update a workout
+    -body JSON: 
+    -id STRING: Workout ID
+
+Example:
+    %[1]s workout update --body '{
+      "name": "Workout A Updated",
+      "trainingPlanId": "f47ac10b-58cc-4372-a567-0e02b2c3d479"
+   }' --id "f47ac10b-58cc-4372-a567-0e02b2c3d481"
+`, os.Args[0])
+}
+
+func workoutDeleteUsage() {
+	fmt.Fprintf(os.Stderr, `%[1]s [flags] workout delete -id STRING
+
+Delete a workout
+    -id STRING: Workout ID
+
+Example:
+    %[1]s workout delete --id "f47ac10b-58cc-4372-a567-0e02b2c3d481"
+`, os.Args[0])
+}
+
+// workouttypeUsage displays the usage of the workouttype command and its
+// subcommands.
+func workouttypeUsage() {
+	fmt.Fprintf(os.Stderr, `Service for managing workout types
+Usage:
+    %[1]s [globalflags] workouttype COMMAND [flags]
+
+COMMAND:
+    create: Create a new workout type
+    get: Get a workout type by ID
+    list: List all workout types with pagination
+    update: Update a workout type
+    delete: Delete a workout type
+
+Additional help:
+    %[1]s workouttype COMMAND --help
+`, os.Args[0])
+}
+func workouttypeCreateUsage() {
+	fmt.Fprintf(os.Stderr, `%[1]s [flags] workouttype create -body JSON
+
+Create a new workout type
+    -body JSON: 
+
+Example:
+    %[1]s workouttype create --body '{
+      "description": "Workout type focused on strength training",
+      "name": "Strength"
+   }'
+`, os.Args[0])
+}
+
+func workouttypeGetUsage() {
+	fmt.Fprintf(os.Stderr, `%[1]s [flags] workouttype get -id STRING
+
+Get a workout type by ID
+    -id STRING: Workout Type ID
+
+Example:
+    %[1]s workouttype get --id "f47ac10b-58cc-4372-a567-0e02b2c3d482"
+`, os.Args[0])
+}
+
+func workouttypeListUsage() {
+	fmt.Fprintf(os.Stderr, `%[1]s [flags] workouttype list -limit INT -offset INT
+
+List all workout types with pagination
+    -limit INT: 
+    -offset INT: 
+
+Example:
+    %[1]s workouttype list --limit 10 --offset 0
+`, os.Args[0])
+}
+
+func workouttypeUpdateUsage() {
+	fmt.Fprintf(os.Stderr, `%[1]s [flags] workouttype update -body JSON -id STRING
+
+Update a workout type
+    -body JSON: 
+    -id STRING: Workout Type ID
+
+Example:
+    %[1]s workouttype update --body '{
+      "description": "Updated description",
+      "name": "Strength Updated"
+   }' --id "f47ac10b-58cc-4372-a567-0e02b2c3d482"
+`, os.Args[0])
+}
+
+func workouttypeDeleteUsage() {
+	fmt.Fprintf(os.Stderr, `%[1]s [flags] workouttype delete -id STRING
+
+Delete a workout type
+    -id STRING: Workout Type ID
+
+Example:
+    %[1]s workouttype delete --id "f47ac10b-58cc-4372-a567-0e02b2c3d482"
 `, os.Args[0])
 }

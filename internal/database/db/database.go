@@ -16,7 +16,7 @@ import (
 )
 
 type Dbinstance struct {
-	AionDB *gorm.DB
+	Database *gorm.DB
 }
 
 var DB Dbinstance
@@ -63,7 +63,7 @@ func ConnectDb() {
 	log.Printf("Connected to %s - %s\n", dbHost, dbName)
 
 	DB = Dbinstance{
-		AionDB: db,
+		Database: db,
 	}
 }
 
