@@ -14,6 +14,551 @@ produces:
     - application/xml
     - application/gob
 paths:
+    /exerciseprogress:
+        get:
+            tags:
+                - exerciseprogress
+            summary: list exerciseprogress
+            description: List all exercise progress records with pagination
+            operationId: exerciseprogress#list
+            parameters:
+                - name: limit
+                  in: query
+                  description: Number of records to return
+                  required: false
+                  type: integer
+                  default: 10
+                  maximum: 100
+                  minimum: 1
+                - name: offset
+                  in: query
+                  description: Offset for pagination
+                  required: false
+                  type: integer
+                  default: 0
+                  minimum: 0
+            responses:
+                "200":
+                    description: OK response.
+                    schema:
+                        type: array
+                        items:
+                            $ref: '#/definitions/ExerciseProgress'
+            schemes:
+                - http
+        post:
+            tags:
+                - exerciseprogress
+            summary: create exerciseprogress
+            description: Create a new exercise progress record
+            operationId: exerciseprogress#create
+            parameters:
+                - name: CreateRequestBody
+                  in: body
+                  required: true
+                  schema:
+                    $ref: '#/definitions/CreateExerciseProgressPayload'
+                    required:
+                        - workoutProgressId
+                        - workoutExerciseId
+                        - actualRepetitions
+            responses:
+                "201":
+                    description: Created response.
+                    schema:
+                        $ref: '#/definitions/ExerciseProgress'
+                        required:
+                            - id
+                            - workoutProgressId
+                            - workoutExerciseId
+                            - actualRepetitions
+            schemes:
+                - http
+    /exerciseprogress/{id}:
+        get:
+            tags:
+                - exerciseprogress
+            summary: get exerciseprogress
+            description: Get an exercise progress record by ID
+            operationId: exerciseprogress#get
+            parameters:
+                - name: id
+                  in: path
+                  description: Exercise Progress ID
+                  required: true
+                  type: string
+                  format: uuid
+            responses:
+                "200":
+                    description: OK response.
+                    schema:
+                        $ref: '#/definitions/ExerciseProgress'
+                        required:
+                            - id
+                            - workoutProgressId
+                            - workoutExerciseId
+                            - actualRepetitions
+            schemes:
+                - http
+        put:
+            tags:
+                - exerciseprogress
+            summary: update exerciseprogress
+            description: Update an exercise progress record
+            operationId: exerciseprogress#update
+            parameters:
+                - name: id
+                  in: path
+                  description: Exercise Progress ID
+                  required: true
+                  type: string
+                  format: uuid
+                - name: UpdateRequestBody
+                  in: body
+                  required: true
+                  schema:
+                    $ref: '#/definitions/UpdateExerciseProgressPayload'
+                    required:
+                        - actualRepetitions
+            responses:
+                "200":
+                    description: OK response.
+                    schema:
+                        $ref: '#/definitions/ExerciseProgress'
+                        required:
+                            - id
+                            - workoutProgressId
+                            - workoutExerciseId
+                            - actualRepetitions
+            schemes:
+                - http
+        delete:
+            tags:
+                - exerciseprogress
+            summary: delete exerciseprogress
+            description: Delete an exercise progress record
+            operationId: exerciseprogress#delete
+            parameters:
+                - name: id
+                  in: path
+                  description: Exercise Progress ID
+                  required: true
+                  type: string
+                  format: uuid
+            responses:
+                "204":
+                    description: No Content response.
+            schemes:
+                - http
+    /exercises:
+        get:
+            tags:
+                - exercise
+            summary: list exercise
+            description: List all exercises with pagination
+            operationId: exercise#list
+            parameters:
+                - name: limit
+                  in: query
+                  description: Number of exercises to return
+                  required: false
+                  type: integer
+                  default: 10
+                  maximum: 100
+                  minimum: 1
+                - name: offset
+                  in: query
+                  description: Offset for pagination
+                  required: false
+                  type: integer
+                  default: 0
+                  minimum: 0
+            responses:
+                "200":
+                    description: OK response.
+                    schema:
+                        type: array
+                        items:
+                            $ref: '#/definitions/Exercise'
+            schemes:
+                - http
+        post:
+            tags:
+                - exercise
+            summary: create exercise
+            description: Create a new exercise
+            operationId: exercise#create
+            parameters:
+                - name: CreateRequestBody
+                  in: body
+                  required: true
+                  schema:
+                    $ref: '#/definitions/CreateExercisePayload'
+                    required:
+                        - name
+                        - muscleGroupId
+            responses:
+                "201":
+                    description: Created response.
+                    schema:
+                        $ref: '#/definitions/Exercise'
+                        required:
+                            - id
+                            - name
+                            - muscleGroupId
+            schemes:
+                - http
+    /exercises/{id}:
+        get:
+            tags:
+                - exercise
+            summary: get exercise
+            description: Get an exercise by ID
+            operationId: exercise#get
+            parameters:
+                - name: id
+                  in: path
+                  description: Exercise ID
+                  required: true
+                  type: string
+                  format: uuid
+            responses:
+                "200":
+                    description: OK response.
+                    schema:
+                        $ref: '#/definitions/Exercise'
+                        required:
+                            - id
+                            - name
+                            - muscleGroupId
+            schemes:
+                - http
+        put:
+            tags:
+                - exercise
+            summary: update exercise
+            description: Update an exercise
+            operationId: exercise#update
+            parameters:
+                - name: id
+                  in: path
+                  description: Exercise ID
+                  required: true
+                  type: string
+                  format: uuid
+                - name: UpdateRequestBody
+                  in: body
+                  required: true
+                  schema:
+                    $ref: '#/definitions/UpdateExercisePayload'
+                    required:
+                        - name
+                        - muscleGroupId
+            responses:
+                "200":
+                    description: OK response.
+                    schema:
+                        $ref: '#/definitions/Exercise'
+                        required:
+                            - id
+                            - name
+                            - muscleGroupId
+            schemes:
+                - http
+        delete:
+            tags:
+                - exercise
+            summary: delete exercise
+            description: Delete an exercise
+            operationId: exercise#delete
+            parameters:
+                - name: id
+                  in: path
+                  description: Exercise ID
+                  required: true
+                  type: string
+                  format: uuid
+            responses:
+                "204":
+                    description: No Content response.
+            schemes:
+                - http
+    /musclegroups:
+        get:
+            tags:
+                - musclegroup
+            summary: list musclegroup
+            description: List all muscle groups with pagination
+            operationId: musclegroup#list
+            parameters:
+                - name: limit
+                  in: query
+                  description: Number of muscle groups to return
+                  required: false
+                  type: integer
+                  default: 10
+                  maximum: 100
+                  minimum: 1
+                - name: offset
+                  in: query
+                  description: Offset for pagination
+                  required: false
+                  type: integer
+                  default: 0
+                  minimum: 0
+            responses:
+                "200":
+                    description: OK response.
+                    schema:
+                        type: array
+                        items:
+                            $ref: '#/definitions/MuscleGroup'
+            schemes:
+                - http
+        post:
+            tags:
+                - musclegroup
+            summary: create musclegroup
+            description: Create a new muscle group
+            operationId: musclegroup#create
+            parameters:
+                - name: CreateRequestBody
+                  in: body
+                  required: true
+                  schema:
+                    $ref: '#/definitions/CreateMuscleGroupPayload'
+                    required:
+                        - name
+            responses:
+                "201":
+                    description: Created response.
+                    schema:
+                        $ref: '#/definitions/MuscleGroup'
+                        required:
+                            - id
+                            - name
+            schemes:
+                - http
+    /musclegroups/{id}:
+        get:
+            tags:
+                - musclegroup
+            summary: get musclegroup
+            description: Get a muscle group by ID
+            operationId: musclegroup#get
+            parameters:
+                - name: id
+                  in: path
+                  description: Muscle Group ID
+                  required: true
+                  type: string
+                  format: uuid
+            responses:
+                "200":
+                    description: OK response.
+                    schema:
+                        $ref: '#/definitions/MuscleGroup'
+                        required:
+                            - id
+                            - name
+            schemes:
+                - http
+        put:
+            tags:
+                - musclegroup
+            summary: update musclegroup
+            description: Update a muscle group
+            operationId: musclegroup#update
+            parameters:
+                - name: id
+                  in: path
+                  description: Muscle Group ID
+                  required: true
+                  type: string
+                  format: uuid
+                - name: UpdateRequestBody
+                  in: body
+                  required: true
+                  schema:
+                    $ref: '#/definitions/UpdateMuscleGroupPayload'
+                    required:
+                        - name
+            responses:
+                "200":
+                    description: OK response.
+                    schema:
+                        $ref: '#/definitions/MuscleGroup'
+                        required:
+                            - id
+                            - name
+            schemes:
+                - http
+        delete:
+            tags:
+                - musclegroup
+            summary: delete musclegroup
+            description: Delete a muscle group
+            operationId: musclegroup#delete
+            parameters:
+                - name: id
+                  in: path
+                  description: Muscle Group ID
+                  required: true
+                  type: string
+                  format: uuid
+            responses:
+                "204":
+                    description: No Content response.
+            schemes:
+                - http
+    /trainingplans:
+        get:
+            tags:
+                - trainingplan
+            summary: list trainingplan
+            description: List all training plans with pagination
+            operationId: trainingplan#list
+            parameters:
+                - name: limit
+                  in: query
+                  description: Number of training plans to return
+                  required: false
+                  type: integer
+                  default: 10
+                  maximum: 100
+                  minimum: 1
+                - name: offset
+                  in: query
+                  description: Offset for pagination
+                  required: false
+                  type: integer
+                  default: 0
+                  minimum: 0
+            responses:
+                "200":
+                    description: OK response.
+                    schema:
+                        type: array
+                        items:
+                            $ref: '#/definitions/TrainingPlan'
+            schemes:
+                - http
+        post:
+            tags:
+                - trainingplan
+            summary: create trainingplan
+            description: Create a new training plan
+            operationId: trainingplan#create
+            parameters:
+                - name: CreateRequestBody
+                  in: body
+                  required: true
+                  schema:
+                    $ref: '#/definitions/CreateTrainingPlanPayload'
+                    required:
+                        - name
+                        - startDate
+                        - endDate
+                        - userId
+                        - workoutTypeId
+            responses:
+                "201":
+                    description: Created response.
+                    schema:
+                        $ref: '#/definitions/TrainingPlan'
+                        required:
+                            - id
+                            - name
+                            - startDate
+                            - endDate
+                            - userId
+                            - workoutTypeId
+            schemes:
+                - http
+    /trainingplans/{id}:
+        get:
+            tags:
+                - trainingplan
+            summary: get trainingplan
+            description: Get a training plan by ID
+            operationId: trainingplan#get
+            parameters:
+                - name: id
+                  in: path
+                  description: Training plan ID
+                  required: true
+                  type: string
+                  format: uuid
+            responses:
+                "200":
+                    description: OK response.
+                    schema:
+                        $ref: '#/definitions/TrainingPlan'
+                        required:
+                            - id
+                            - name
+                            - startDate
+                            - endDate
+                            - userId
+                            - workoutTypeId
+            schemes:
+                - http
+        put:
+            tags:
+                - trainingplan
+            summary: update trainingplan
+            description: Update a training plan
+            operationId: trainingplan#update
+            parameters:
+                - name: id
+                  in: path
+                  description: Unique ID of the training plan
+                  required: true
+                  type: string
+                  format: uuid
+                - name: UpdateRequestBody
+                  in: body
+                  required: true
+                  schema:
+                    $ref: '#/definitions/UpdateTrainingPlanPayload'
+                    required:
+                        - name
+                        - startDate
+                        - endDate
+                        - userId
+                        - workoutTypeId
+            responses:
+                "200":
+                    description: OK response.
+                    schema:
+                        $ref: '#/definitions/TrainingPlan'
+                        required:
+                            - id
+                            - name
+                            - startDate
+                            - endDate
+                            - userId
+                            - workoutTypeId
+            schemes:
+                - http
+        delete:
+            tags:
+                - trainingplan
+            summary: delete trainingplan
+            description: Delete a training plan
+            operationId: trainingplan#delete
+            parameters:
+                - name: id
+                  in: path
+                  description: Training plan ID
+                  required: true
+                  type: string
+                  format: uuid
+            responses:
+                "204":
+                    description: No Content response.
+            schemes:
+                - http
     /user:
         get:
             tags:
@@ -239,6 +784,544 @@ paths:
                             - message
             schemes:
                 - http
+    /workoutexercises:
+        get:
+            tags:
+                - workoutexercise
+            summary: list workoutexercise
+            description: List all workout exercise configurations with pagination
+            operationId: workoutexercise#list
+            parameters:
+                - name: limit
+                  in: query
+                  description: Number of items to return
+                  required: false
+                  type: integer
+                  default: 10
+                  maximum: 100
+                  minimum: 1
+                - name: offset
+                  in: query
+                  description: Offset for pagination
+                  required: false
+                  type: integer
+                  default: 0
+                  minimum: 0
+            responses:
+                "200":
+                    description: OK response.
+                    schema:
+                        type: array
+                        items:
+                            $ref: '#/definitions/WorkoutExercise'
+            schemes:
+                - http
+        post:
+            tags:
+                - workoutexercise
+            summary: create workoutexercise
+            description: Create a new workout exercise configuration
+            operationId: workoutexercise#create
+            parameters:
+                - name: CreateRequestBody
+                  in: body
+                  required: true
+                  schema:
+                    $ref: '#/definitions/CreateWorkoutExercisePayload'
+                    required:
+                        - workoutId
+                        - exerciseId
+                        - sets
+                        - repetitions
+            responses:
+                "201":
+                    description: Created response.
+                    schema:
+                        $ref: '#/definitions/WorkoutExercise'
+                        required:
+                            - id
+                            - workoutId
+                            - exerciseId
+                            - sets
+                            - repetitions
+            schemes:
+                - http
+    /workoutexercises/{id}:
+        get:
+            tags:
+                - workoutexercise
+            summary: get workoutexercise
+            description: Get a workout exercise configuration by ID
+            operationId: workoutexercise#get
+            parameters:
+                - name: id
+                  in: path
+                  description: Workout Exercise ID
+                  required: true
+                  type: string
+                  format: uuid
+            responses:
+                "200":
+                    description: OK response.
+                    schema:
+                        $ref: '#/definitions/WorkoutExercise'
+                        required:
+                            - id
+                            - workoutId
+                            - exerciseId
+                            - sets
+                            - repetitions
+            schemes:
+                - http
+        put:
+            tags:
+                - workoutexercise
+            summary: update workoutexercise
+            description: Update a workout exercise configuration
+            operationId: workoutexercise#update
+            parameters:
+                - name: id
+                  in: path
+                  description: Workout Exercise ID
+                  required: true
+                  type: string
+                  format: uuid
+                - name: UpdateRequestBody
+                  in: body
+                  required: true
+                  schema:
+                    $ref: '#/definitions/UpdateWorkoutExercisePayload'
+                    required:
+                        - sets
+                        - repetitions
+            responses:
+                "200":
+                    description: OK response.
+                    schema:
+                        $ref: '#/definitions/WorkoutExercise'
+                        required:
+                            - id
+                            - workoutId
+                            - exerciseId
+                            - sets
+                            - repetitions
+            schemes:
+                - http
+        delete:
+            tags:
+                - workoutexercise
+            summary: delete workoutexercise
+            description: Delete a workout exercise configuration
+            operationId: workoutexercise#delete
+            parameters:
+                - name: id
+                  in: path
+                  description: Workout Exercise ID
+                  required: true
+                  type: string
+                  format: uuid
+            responses:
+                "204":
+                    description: No Content response.
+            schemes:
+                - http
+    /workoutprogress:
+        get:
+            tags:
+                - workoutprogress
+            summary: list workoutprogress
+            description: List all workout progress records with pagination
+            operationId: workoutprogress#list
+            parameters:
+                - name: limit
+                  in: query
+                  description: Number of records to return
+                  required: false
+                  type: integer
+                  default: 10
+                  maximum: 100
+                  minimum: 1
+                - name: offset
+                  in: query
+                  description: Offset for pagination
+                  required: false
+                  type: integer
+                  default: 0
+                  minimum: 0
+            responses:
+                "200":
+                    description: OK response.
+                    schema:
+                        type: array
+                        items:
+                            $ref: '#/definitions/WorkoutProgress'
+            schemes:
+                - http
+        post:
+            tags:
+                - workoutprogress
+            summary: create workoutprogress
+            description: Create a new workout progress record
+            operationId: workoutprogress#create
+            parameters:
+                - name: CreateRequestBody
+                  in: body
+                  required: true
+                  schema:
+                    $ref: '#/definitions/CreateWorkoutProgressPayload'
+                    required:
+                        - workoutId
+                        - userId
+                        - date
+            responses:
+                "201":
+                    description: Created response.
+                    schema:
+                        $ref: '#/definitions/WorkoutProgress'
+                        required:
+                            - id
+                            - workoutId
+                            - userId
+                            - date
+            schemes:
+                - http
+    /workoutprogress/{id}:
+        get:
+            tags:
+                - workoutprogress
+            summary: get workoutprogress
+            description: Get a workout progress record by ID
+            operationId: workoutprogress#get
+            parameters:
+                - name: id
+                  in: path
+                  description: Workout Progress ID
+                  required: true
+                  type: string
+                  format: uuid
+            responses:
+                "200":
+                    description: OK response.
+                    schema:
+                        $ref: '#/definitions/WorkoutProgress'
+                        required:
+                            - id
+                            - workoutId
+                            - userId
+                            - date
+            schemes:
+                - http
+        put:
+            tags:
+                - workoutprogress
+            summary: update workoutprogress
+            description: Update a workout progress record
+            operationId: workoutprogress#update
+            parameters:
+                - name: id
+                  in: path
+                  description: Workout Progress ID
+                  required: true
+                  type: string
+                  format: uuid
+                - name: UpdateRequestBody
+                  in: body
+                  required: true
+                  schema:
+                    $ref: '#/definitions/UpdateWorkoutProgressPayload'
+                    required:
+                        - date
+            responses:
+                "200":
+                    description: OK response.
+                    schema:
+                        $ref: '#/definitions/WorkoutProgress'
+                        required:
+                            - id
+                            - workoutId
+                            - userId
+                            - date
+            schemes:
+                - http
+        delete:
+            tags:
+                - workoutprogress
+            summary: delete workoutprogress
+            description: Delete a workout progress record
+            operationId: workoutprogress#delete
+            parameters:
+                - name: id
+                  in: path
+                  description: Workout Progress ID
+                  required: true
+                  type: string
+                  format: uuid
+            responses:
+                "204":
+                    description: No Content response.
+            schemes:
+                - http
+    /workouts:
+        get:
+            tags:
+                - workout
+            summary: list workout
+            description: List all workouts with pagination
+            operationId: workout#list
+            parameters:
+                - name: limit
+                  in: query
+                  description: Number of workouts to return
+                  required: false
+                  type: integer
+                  default: 10
+                  maximum: 100
+                  minimum: 1
+                - name: offset
+                  in: query
+                  description: Offset for pagination
+                  required: false
+                  type: integer
+                  default: 0
+                  minimum: 0
+            responses:
+                "200":
+                    description: OK response.
+                    schema:
+                        type: array
+                        items:
+                            $ref: '#/definitions/Workout'
+            schemes:
+                - http
+        post:
+            tags:
+                - workout
+            summary: create workout
+            description: Create a new workout
+            operationId: workout#create
+            parameters:
+                - name: CreateRequestBody
+                  in: body
+                  required: true
+                  schema:
+                    $ref: '#/definitions/CreateWorkoutPayload'
+                    required:
+                        - name
+                        - trainingPlanId
+            responses:
+                "201":
+                    description: Created response.
+                    schema:
+                        $ref: '#/definitions/Workout'
+                        required:
+                            - id
+                            - name
+                            - trainingPlanId
+            schemes:
+                - http
+    /workouts/{id}:
+        get:
+            tags:
+                - workout
+            summary: get workout
+            description: Get a workout by ID
+            operationId: workout#get
+            parameters:
+                - name: id
+                  in: path
+                  description: Workout ID
+                  required: true
+                  type: string
+                  format: uuid
+            responses:
+                "200":
+                    description: OK response.
+                    schema:
+                        $ref: '#/definitions/Workout'
+                        required:
+                            - id
+                            - name
+                            - trainingPlanId
+            schemes:
+                - http
+        put:
+            tags:
+                - workout
+            summary: update workout
+            description: Update a workout
+            operationId: workout#update
+            parameters:
+                - name: id
+                  in: path
+                  description: Workout ID
+                  required: true
+                  type: string
+                  format: uuid
+                - name: UpdateRequestBody
+                  in: body
+                  required: true
+                  schema:
+                    $ref: '#/definitions/UpdateWorkoutPayload'
+                    required:
+                        - name
+                        - trainingPlanId
+            responses:
+                "200":
+                    description: OK response.
+                    schema:
+                        $ref: '#/definitions/Workout'
+                        required:
+                            - id
+                            - name
+                            - trainingPlanId
+            schemes:
+                - http
+        delete:
+            tags:
+                - workout
+            summary: delete workout
+            description: Delete a workout
+            operationId: workout#delete
+            parameters:
+                - name: id
+                  in: path
+                  description: Workout ID
+                  required: true
+                  type: string
+                  format: uuid
+            responses:
+                "204":
+                    description: No Content response.
+            schemes:
+                - http
+    /workouttypes:
+        get:
+            tags:
+                - workouttype
+            summary: list workouttype
+            description: List all workout types with pagination
+            operationId: workouttype#list
+            parameters:
+                - name: limit
+                  in: query
+                  description: Number of workout types to return
+                  required: false
+                  type: integer
+                  default: 10
+                  maximum: 100
+                  minimum: 1
+                - name: offset
+                  in: query
+                  description: Offset for pagination
+                  required: false
+                  type: integer
+                  default: 0
+                  minimum: 0
+            responses:
+                "200":
+                    description: OK response.
+                    schema:
+                        type: array
+                        items:
+                            $ref: '#/definitions/WorkoutType'
+            schemes:
+                - http
+        post:
+            tags:
+                - workouttype
+            summary: create workouttype
+            description: Create a new workout type
+            operationId: workouttype#create
+            parameters:
+                - name: CreateRequestBody
+                  in: body
+                  required: true
+                  schema:
+                    $ref: '#/definitions/CreateWorkoutTypePayload'
+                    required:
+                        - name
+            responses:
+                "201":
+                    description: Created response.
+                    schema:
+                        $ref: '#/definitions/WorkoutType'
+                        required:
+                            - id
+                            - name
+            schemes:
+                - http
+    /workouttypes/{id}:
+        get:
+            tags:
+                - workouttype
+            summary: get workouttype
+            description: Get a workout type by ID
+            operationId: workouttype#get
+            parameters:
+                - name: id
+                  in: path
+                  description: Workout Type ID
+                  required: true
+                  type: string
+                  format: uuid
+            responses:
+                "200":
+                    description: OK response.
+                    schema:
+                        $ref: '#/definitions/WorkoutType'
+                        required:
+                            - id
+                            - name
+            schemes:
+                - http
+        put:
+            tags:
+                - workouttype
+            summary: update workouttype
+            description: Update a workout type
+            operationId: workouttype#update
+            parameters:
+                - name: id
+                  in: path
+                  description: Workout Type ID
+                  required: true
+                  type: string
+                  format: uuid
+                - name: UpdateRequestBody
+                  in: body
+                  required: true
+                  schema:
+                    $ref: '#/definitions/UpdateWorkoutTypePayload'
+                    required:
+                        - name
+            responses:
+                "200":
+                    description: OK response.
+                    schema:
+                        $ref: '#/definitions/WorkoutType'
+                        required:
+                            - id
+                            - name
+            schemes:
+                - http
+        delete:
+            tags:
+                - workouttype
+            summary: delete workouttype
+            description: Delete a workout type
+            operationId: workouttype#delete
+            parameters:
+                - name: id
+                  in: path
+                  description: Workout Type ID
+                  required: true
+                  type: string
+                  format: uuid
+            responses:
+                "204":
+                    description: No Content response.
+            schemes:
+                - http
 definitions:
     BadRequest:
         title: BadRequest
@@ -283,6 +1366,131 @@ definitions:
             - temporary
             - timeout
             - fault
+    CreateExercisePayload:
+        title: CreateExercisePayload
+        type: object
+        properties:
+            muscleGroupId:
+                type: string
+                description: Muscle Group ID
+                example: f47ac10b-58cc-4372-a567-0e02b2c3d483
+                format: uuid
+            name:
+                type: string
+                description: Name of the exercise
+                example: Push Up
+        example:
+            muscleGroupId: f47ac10b-58cc-4372-a567-0e02b2c3d483
+            name: Push Up
+        required:
+            - name
+            - muscleGroupId
+    CreateExerciseProgressPayload:
+        title: CreateExerciseProgressPayload
+        type: object
+        properties:
+            actualDuration:
+                type: integer
+                description: Actual duration in seconds
+                example: 60
+                format: int64
+            actualRepetitions:
+                type: integer
+                description: Actual repetitions performed
+                example: 10
+                format: int64
+            actualWeight:
+                type: number
+                description: Actual weight used
+                example: 50
+                format: float
+            notes:
+                type: string
+                description: Notes
+                example: Felt strong
+            workoutExerciseId:
+                type: string
+                description: Workout Exercise ID
+                example: f47ac10b-58cc-4372-a567-0e02b2c3d485
+                format: uuid
+            workoutProgressId:
+                type: string
+                description: Workout Progress ID
+                example: f47ac10b-58cc-4372-a567-0e02b2c3d486
+                format: uuid
+        example:
+            actualDuration: 60
+            actualRepetitions: 10
+            actualWeight: 50
+            notes: Felt strong
+            workoutExerciseId: f47ac10b-58cc-4372-a567-0e02b2c3d485
+            workoutProgressId: f47ac10b-58cc-4372-a567-0e02b2c3d486
+        required:
+            - workoutProgressId
+            - workoutExerciseId
+            - actualRepetitions
+    CreateMuscleGroupPayload:
+        title: CreateMuscleGroupPayload
+        type: object
+        properties:
+            description:
+                type: string
+                description: Description
+                example: Group for chest exercises
+            name:
+                type: string
+                description: Name of the muscle group
+                example: Chest
+        example:
+            description: Group for chest exercises
+            name: Chest
+        required:
+            - name
+    CreateTrainingPlanPayload:
+        title: CreateTrainingPlanPayload
+        type: object
+        properties:
+            description:
+                type: string
+                description: Description
+                example: Descrizione del piano di allenamento
+            endDate:
+                type: string
+                description: End date
+                example: "2025-02-28T00:00:00Z"
+                format: date-time
+            name:
+                type: string
+                description: Name of the training plan
+                example: Piano di Allenamento
+            startDate:
+                type: string
+                description: Start date
+                example: "2025-02-01T00:00:00Z"
+                format: date-time
+            userId:
+                type: string
+                description: User ID
+                example: f47ac10b-58cc-4372-a567-0e02b2c3d479
+                format: uuid
+            workoutTypeId:
+                type: string
+                description: Workout Type ID
+                example: f47ac10b-58cc-4372-a567-0e02b2c3d480
+                format: uuid
+        example:
+            description: Descrizione del piano di allenamento
+            endDate: "2025-02-28T00:00:00Z"
+            name: Piano di Allenamento
+            startDate: "2025-02-01T00:00:00Z"
+            userId: f47ac10b-58cc-4372-a567-0e02b2c3d479
+            workoutTypeId: f47ac10b-58cc-4372-a567-0e02b2c3d480
+        required:
+            - name
+            - startDate
+            - endDate
+            - userId
+            - workoutTypeId
     CreateUserPayload:
         title: CreateUserPayload
         type: object
@@ -319,6 +1527,191 @@ definitions:
             - kcId
             - firstName
             - lastName
+    CreateWorkoutExercisePayload:
+        title: CreateWorkoutExercisePayload
+        type: object
+        properties:
+            duration:
+                type: integer
+                description: Duration in seconds
+                example: 60
+                format: int64
+            exerciseId:
+                type: string
+                description: Exercise ID
+                example: f47ac10b-58cc-4372-a567-0e02b2c3d484
+                format: uuid
+            notes:
+                type: string
+                description: Notes
+                example: Focus on form
+            repetitions:
+                type: integer
+                description: Number of repetitions
+                example: 12
+                format: int64
+            sets:
+                type: integer
+                description: Number of sets
+                example: 3
+                format: int64
+            workoutId:
+                type: string
+                description: Workout ID
+                example: f47ac10b-58cc-4372-a567-0e02b2c3d481
+                format: uuid
+        example:
+            duration: 60
+            exerciseId: f47ac10b-58cc-4372-a567-0e02b2c3d484
+            notes: Focus on form
+            repetitions: 12
+            sets: 3
+            workoutId: f47ac10b-58cc-4372-a567-0e02b2c3d481
+        required:
+            - workoutId
+            - exerciseId
+            - sets
+            - repetitions
+    CreateWorkoutPayload:
+        title: CreateWorkoutPayload
+        type: object
+        properties:
+            name:
+                type: string
+                description: Name of the workout
+                example: Workout A
+            trainingPlanId:
+                type: string
+                description: Training Plan ID
+                example: f47ac10b-58cc-4372-a567-0e02b2c3d479
+                format: uuid
+        example:
+            name: Workout A
+            trainingPlanId: f47ac10b-58cc-4372-a567-0e02b2c3d479
+        required:
+            - name
+            - trainingPlanId
+    CreateWorkoutProgressPayload:
+        title: CreateWorkoutProgressPayload
+        type: object
+        properties:
+            date:
+                type: string
+                description: Date of the workout progress
+                example: "2025-02-15T10:00:00Z"
+                format: date-time
+            userId:
+                type: string
+                description: User ID
+                example: f47ac10b-58cc-4372-a567-0e02b2c3d479
+                format: uuid
+            workoutId:
+                type: string
+                description: Workout ID
+                example: f47ac10b-58cc-4372-a567-0e02b2c3d481
+                format: uuid
+        example:
+            date: "2025-02-15T10:00:00Z"
+            userId: f47ac10b-58cc-4372-a567-0e02b2c3d479
+            workoutId: f47ac10b-58cc-4372-a567-0e02b2c3d481
+        required:
+            - workoutId
+            - userId
+            - date
+    CreateWorkoutTypePayload:
+        title: CreateWorkoutTypePayload
+        type: object
+        properties:
+            description:
+                type: string
+                description: Description
+                example: Workout type focused on strength training
+            name:
+                type: string
+                description: Name of the workout type
+                example: Strength
+        example:
+            description: Workout type focused on strength training
+            name: Strength
+        required:
+            - name
+    Exercise:
+        title: Exercise
+        type: object
+        properties:
+            id:
+                type: string
+                description: Unique ID of the exercise
+                example: f47ac10b-58cc-4372-a567-0e02b2c3d484
+                format: uuid
+            muscleGroupId:
+                type: string
+                description: Muscle Group ID
+                example: f47ac10b-58cc-4372-a567-0e02b2c3d483
+                format: uuid
+            name:
+                type: string
+                description: Name of the exercise
+                example: Push Up
+        example:
+            id: f47ac10b-58cc-4372-a567-0e02b2c3d484
+            muscleGroupId: f47ac10b-58cc-4372-a567-0e02b2c3d483
+            name: Push Up
+        required:
+            - id
+            - name
+            - muscleGroupId
+    ExerciseProgress:
+        title: ExerciseProgress
+        type: object
+        properties:
+            actualDuration:
+                type: integer
+                description: Actual duration in seconds
+                example: 60
+                format: int64
+            actualRepetitions:
+                type: integer
+                description: Actual repetitions performed
+                example: 10
+                format: int64
+            actualWeight:
+                type: number
+                description: Actual weight used
+                example: 50
+                format: float
+            id:
+                type: string
+                description: Unique ID of the exercise progress
+                example: f47ac10b-58cc-4372-a567-0e02b2c3d487
+                format: uuid
+            notes:
+                type: string
+                description: Notes
+                example: Felt strong
+            workoutExerciseId:
+                type: string
+                description: Workout Exercise ID
+                example: f47ac10b-58cc-4372-a567-0e02b2c3d485
+                format: uuid
+            workoutProgressId:
+                type: string
+                description: Workout Progress ID
+                example: f47ac10b-58cc-4372-a567-0e02b2c3d486
+                format: uuid
+        example:
+            actualDuration: 60
+            actualRepetitions: 10
+            actualWeight: 50
+            id: f47ac10b-58cc-4372-a567-0e02b2c3d487
+            notes: Felt strong
+            workoutExerciseId: f47ac10b-58cc-4372-a567-0e02b2c3d485
+            workoutProgressId: f47ac10b-58cc-4372-a567-0e02b2c3d486
+        required:
+            - id
+            - workoutProgressId
+            - workoutExerciseId
+            - actualRepetitions
     InternalServerError:
         title: InternalServerError
         type: object
@@ -327,12 +1720,36 @@ definitions:
                 type: string
                 description: Descrizione dell'errore
                 default: Errore di comunicazione con il server
-                example: Et corporis.
+                example: Aut qui.
         description: Errore nel server
         example:
-            message: Necessitatibus hic amet.
+            message: Recusandae corrupti autem.
         required:
             - message
+    MuscleGroup:
+        title: MuscleGroup
+        type: object
+        properties:
+            description:
+                type: string
+                description: Description
+                example: Group for chest exercises
+            id:
+                type: string
+                description: Unique ID of the muscle group
+                example: f47ac10b-58cc-4372-a567-0e02b2c3d483
+                format: uuid
+            name:
+                type: string
+                description: Name of the muscle group
+                example: Chest
+        example:
+            description: Group for chest exercises
+            id: f47ac10b-58cc-4372-a567-0e02b2c3d483
+            name: Chest
+        required:
+            - id
+            - name
     NotFound:
         title: NotFound
         type: object
@@ -341,12 +1758,64 @@ definitions:
                 type: string
                 description: Descrizione dell'errore
                 default: Dato non trovato
-                example: Consequatur voluptas.
+                example: Omnis blanditiis assumenda in error ducimus quod.
         description: Dato non trovato all'interno del sistema
         example:
-            message: Optio esse sed odit.
+            message: Vel est in impedit qui.
         required:
             - message
+    TrainingPlan:
+        title: TrainingPlan
+        type: object
+        properties:
+            description:
+                type: string
+                description: Description
+                example: Descrizione del piano di allenamento
+            endDate:
+                type: string
+                description: End date
+                example: "2025-02-28T00:00:00Z"
+                format: date-time
+            id:
+                type: string
+                description: Unique ID of the training plan
+                example: f47ac10b-58cc-4372-a567-0e02b2c3d479
+                format: uuid
+            name:
+                type: string
+                description: Name of the training plan
+                example: Piano di Allenamento
+            startDate:
+                type: string
+                description: Start date
+                example: "2025-02-01T00:00:00Z"
+                format: date-time
+            userId:
+                type: string
+                description: User ID
+                example: f47ac10b-58cc-4372-a567-0e02b2c3d479
+                format: uuid
+            workoutTypeId:
+                type: string
+                description: Workout Type ID
+                example: f47ac10b-58cc-4372-a567-0e02b2c3d480
+                format: uuid
+        example:
+            description: Descrizione del piano di allenamento
+            endDate: "2025-02-28T00:00:00Z"
+            id: f47ac10b-58cc-4372-a567-0e02b2c3d479
+            name: Piano di Allenamento
+            startDate: "2025-02-01T00:00:00Z"
+            userId: f47ac10b-58cc-4372-a567-0e02b2c3d479
+            workoutTypeId: f47ac10b-58cc-4372-a567-0e02b2c3d480
+        required:
+            - id
+            - name
+            - startDate
+            - endDate
+            - userId
+            - workoutTypeId
     Unauthorized:
         title: Unauthorized
         type: object
@@ -355,12 +1824,203 @@ definitions:
                 type: string
                 description: Descrizione dell'errore
                 default: Utente già registrato a
-                example: Alias praesentium repellendus ipsum.
+                example: Laudantium sit sed voluptates et sit.
         description: Autenticazione fallita
         example:
-            message: Molestias ad alias aut autem ea.
+            message: A quos dolor assumenda voluptatem et libero.
         required:
             - message
+    UpdateExercisePayload:
+        title: UpdateExercisePayload
+        type: object
+        properties:
+            muscleGroupId:
+                type: string
+                description: Muscle Group ID
+                example: f47ac10b-58cc-4372-a567-0e02b2c3d483
+                format: uuid
+            name:
+                type: string
+                description: Name of the exercise
+                example: Push Up Updated
+        example:
+            muscleGroupId: f47ac10b-58cc-4372-a567-0e02b2c3d483
+            name: Push Up Updated
+        required:
+            - name
+            - muscleGroupId
+    UpdateExerciseProgressPayload:
+        title: UpdateExerciseProgressPayload
+        type: object
+        properties:
+            actualDuration:
+                type: integer
+                description: Actual duration in seconds
+                example: 60
+                format: int64
+            actualRepetitions:
+                type: integer
+                description: Actual repetitions performed
+                example: 10
+                format: int64
+            actualWeight:
+                type: number
+                description: Actual weight used
+                example: 50
+                format: float
+            notes:
+                type: string
+                description: Notes
+                example: Felt strong
+        example:
+            actualDuration: 60
+            actualRepetitions: 10
+            actualWeight: 50
+            notes: Felt strong
+        required:
+            - actualRepetitions
+    UpdateMuscleGroupPayload:
+        title: UpdateMuscleGroupPayload
+        type: object
+        properties:
+            description:
+                type: string
+                description: Description
+                example: Updated description
+            name:
+                type: string
+                description: Name of the muscle group
+                example: Chest Updated
+        example:
+            description: Updated description
+            name: Chest Updated
+        required:
+            - name
+    UpdateTrainingPlanPayload:
+        title: UpdateTrainingPlanPayload
+        type: object
+        properties:
+            description:
+                type: string
+                description: Description
+                example: Descrizione aggiornata del piano
+            endDate:
+                type: string
+                description: End date
+                example: "2025-02-28T00:00:00Z"
+                format: date-time
+            name:
+                type: string
+                description: Name of the training plan
+                example: Piano di Allenamento Updated
+            startDate:
+                type: string
+                description: Start date
+                example: "2025-02-01T00:00:00Z"
+                format: date-time
+            userId:
+                type: string
+                description: User ID
+                example: f47ac10b-58cc-4372-a567-0e02b2c3d479
+                format: uuid
+            workoutTypeId:
+                type: string
+                description: Workout Type ID
+                example: f47ac10b-58cc-4372-a567-0e02b2c3d480
+                format: uuid
+        example:
+            description: Descrizione aggiornata del piano
+            endDate: "2025-02-28T00:00:00Z"
+            name: Piano di Allenamento Updated
+            startDate: "2025-02-01T00:00:00Z"
+            userId: f47ac10b-58cc-4372-a567-0e02b2c3d479
+            workoutTypeId: f47ac10b-58cc-4372-a567-0e02b2c3d480
+        required:
+            - name
+            - startDate
+            - endDate
+            - userId
+            - workoutTypeId
+    UpdateWorkoutExercisePayload:
+        title: UpdateWorkoutExercisePayload
+        type: object
+        properties:
+            duration:
+                type: integer
+                description: Duration in seconds
+                example: 60
+                format: int64
+            notes:
+                type: string
+                description: Notes
+                example: Focus on form
+            repetitions:
+                type: integer
+                description: Number of repetitions
+                example: 12
+                format: int64
+            sets:
+                type: integer
+                description: Number of sets
+                example: 3
+                format: int64
+        example:
+            duration: 60
+            notes: Focus on form
+            repetitions: 12
+            sets: 3
+        required:
+            - sets
+            - repetitions
+    UpdateWorkoutPayload:
+        title: UpdateWorkoutPayload
+        type: object
+        properties:
+            name:
+                type: string
+                description: Name of the workout
+                example: Workout A Updated
+            trainingPlanId:
+                type: string
+                description: Training Plan ID
+                example: f47ac10b-58cc-4372-a567-0e02b2c3d479
+                format: uuid
+        example:
+            name: Workout A Updated
+            trainingPlanId: f47ac10b-58cc-4372-a567-0e02b2c3d479
+        required:
+            - name
+            - trainingPlanId
+    UpdateWorkoutProgressPayload:
+        title: UpdateWorkoutProgressPayload
+        type: object
+        properties:
+            date:
+                type: string
+                description: Date of the workout progress
+                example: "2025-02-15T10:00:00Z"
+                format: date-time
+        example:
+            date: "2025-02-15T10:00:00Z"
+        required:
+            - date
+    UpdateWorkoutTypePayload:
+        title: UpdateWorkoutTypePayload
+        type: object
+        properties:
+            description:
+                type: string
+                description: Description
+                example: Updated description
+            name:
+                type: string
+                description: Name of the workout type
+                example: Strength Updated
+        example:
+            description: Updated description
+            name: Strength Updated
+        required:
+            - name
     User:
         title: User
         type: object
@@ -440,3 +2100,139 @@ definitions:
             - kcId
             - firstName
             - lastName
+    Workout:
+        title: Workout
+        type: object
+        properties:
+            id:
+                type: string
+                description: Unique ID of the workout
+                example: f47ac10b-58cc-4372-a567-0e02b2c3d481
+                format: uuid
+            name:
+                type: string
+                description: Name of the workout
+                example: Workout A
+            trainingPlanId:
+                type: string
+                description: Training Plan ID
+                example: f47ac10b-58cc-4372-a567-0e02b2c3d479
+                format: uuid
+        example:
+            id: f47ac10b-58cc-4372-a567-0e02b2c3d481
+            name: Workout A
+            trainingPlanId: f47ac10b-58cc-4372-a567-0e02b2c3d479
+        required:
+            - id
+            - name
+            - trainingPlanId
+    WorkoutExercise:
+        title: WorkoutExercise
+        type: object
+        properties:
+            duration:
+                type: integer
+                description: Duration in seconds
+                example: 60
+                format: int64
+            exerciseId:
+                type: string
+                description: Exercise ID
+                example: f47ac10b-58cc-4372-a567-0e02b2c3d484
+                format: uuid
+            id:
+                type: string
+                description: Unique ID of the workout exercise
+                example: f47ac10b-58cc-4372-a567-0e02b2c3d485
+                format: uuid
+            notes:
+                type: string
+                description: Notes
+                example: Focus on form
+            repetitions:
+                type: integer
+                description: Number of repetitions
+                example: 12
+                format: int64
+            sets:
+                type: integer
+                description: Number of sets
+                example: 3
+                format: int64
+            workoutId:
+                type: string
+                description: Workout ID
+                example: f47ac10b-58cc-4372-a567-0e02b2c3d481
+                format: uuid
+        example:
+            duration: 60
+            exerciseId: f47ac10b-58cc-4372-a567-0e02b2c3d484
+            id: f47ac10b-58cc-4372-a567-0e02b2c3d485
+            notes: Focus on form
+            repetitions: 12
+            sets: 3
+            workoutId: f47ac10b-58cc-4372-a567-0e02b2c3d481
+        required:
+            - id
+            - workoutId
+            - exerciseId
+            - sets
+            - repetitions
+    WorkoutProgress:
+        title: WorkoutProgress
+        type: object
+        properties:
+            date:
+                type: string
+                description: Date of the workout progress
+                example: "2025-02-15T10:00:00Z"
+                format: date-time
+            id:
+                type: string
+                description: Unique ID of the workout progress
+                example: f47ac10b-58cc-4372-a567-0e02b2c3d486
+                format: uuid
+            userId:
+                type: string
+                description: User ID
+                example: f47ac10b-58cc-4372-a567-0e02b2c3d479
+                format: uuid
+            workoutId:
+                type: string
+                description: Workout ID
+                example: f47ac10b-58cc-4372-a567-0e02b2c3d481
+                format: uuid
+        example:
+            date: "2025-02-15T10:00:00Z"
+            id: f47ac10b-58cc-4372-a567-0e02b2c3d486
+            userId: f47ac10b-58cc-4372-a567-0e02b2c3d479
+            workoutId: f47ac10b-58cc-4372-a567-0e02b2c3d481
+        required:
+            - id
+            - workoutId
+            - userId
+            - date
+    WorkoutType:
+        title: WorkoutType
+        type: object
+        properties:
+            description:
+                type: string
+                description: Description
+                example: Workout type focused on strength training
+            id:
+                type: string
+                description: Unique ID of the workout type
+                example: f47ac10b-58cc-4372-a567-0e02b2c3d482
+                format: uuid
+            name:
+                type: string
+                description: Name of the workout type
+                example: Strength
+        example:
+            description: Workout type focused on strength training
+            id: f47ac10b-58cc-4372-a567-0e02b2c3d482
+            name: Strength
+        required:
+            - id
+            - name
